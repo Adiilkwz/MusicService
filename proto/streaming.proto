@@ -1,0 +1,55 @@
+syntax = "proto3";
+
+package streaming;
+option go_package = "github.com/Adiilkwz/music-grpc-go/streaming";
+
+service StreamingService {
+  rpc StreamAudio (StreamRequest) returns (stream StreamResponse);
+  rpc RecordPlay (RecordPlayRequest) returns (RecordPlayResponse);
+  rpc GetTrending (GetTrendingRequest) returns (GetTrendingResponse);
+  rpc GetUserHistory (GetHistoryRequest) returns (GetHistoryResponse);
+}
+
+message StreamRequest {
+  int64 song_id = 1;
+}
+
+message StreamResponse {
+  bytes audio_chunk = 1;
+}
+
+message RecordPlayRequest {
+  int64 user_id = 1;
+  int64 song_id = 2;
+}
+
+message RecordPlayResponse {
+  bool success = 1;
+}
+
+message GetTrendingRequest {
+  int32 limit = 1;
+}
+
+message TrendingItem {
+  int64 song_id = 1;
+  int64 total_plays = 2;
+}
+
+message GetTrendingResponse {
+  repeated TrendingItem items = 1;
+}
+
+message GetHistoryRequest {
+  int64 user_id = 1;
+  int32 limit = 2;
+}
+
+message HistoryItem {
+  int64 song_id = 1;
+  string played_at = 2;
+}
+
+message GetHistoryResponse {
+  repeated HistoryItem history = 1;
+}

@@ -1,0 +1,60 @@
+syntax = "proto3";
+
+package catalog;
+option go_package = "github.com/Adiilkwz/music-grpc-go/catalog";
+
+service CatalogService {
+  rpc GetSongDetails (GetSongRequest) returns (GetSongResponse);
+  rpc SearchCatalog (SearchRequest) returns (SearchResponse);
+  rpc ListArtistAlbums (ListAlbumsRequest) returns (ListAlbumsResponse);
+  rpc AddSong (AddSongRequest) returns (AddSongResponse);
+}
+
+message Song {
+  int64 id = 1;
+  string title = 2;
+  string artist_name = 3;
+  string cover_image_url = 4;
+  int32 duration_seconds = 5;
+}
+
+message GetSongRequest {
+  int64 song_id = 1;
+}
+
+message GetSongResponse {
+  Song song = 1;
+}
+
+message SearchRequest {
+  string query = 1;
+  int32 limit = 2;
+}
+
+message SearchResponse {
+  repeated Song songs = 1;
+}
+
+message ListAlbumsRequest {
+  int64 artist_id = 1;
+}
+
+message Album {
+  int64 id = 1;
+  string title = 2;
+  string release_year = 3;
+}
+
+message ListAlbumsResponse {
+  repeated Album albums = 1;
+}
+
+message AddSongRequest {
+  string title = 1;
+  int64 artist_id = 2;
+  int32 duration_seconds = 3;
+}
+
+message AddSongResponse {
+  int64 new_song_id = 1;
+}

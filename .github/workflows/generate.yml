@@ -1,0 +1,63 @@
+name: Generate and Push gRPC Code
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'proto/**.proto'
+
+jobs:
+  generate-and-push:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Main Project
+        uses: actions/checkout@v4
+        with:
+          path: main-project
+
+      - name: Checkout Target Repo
+        uses: actions/checkout@v4
+        with:
+          repository: Adiilkwz/music-grpc-go
+          token: ${{ secrets.GH_PAT }}
+          path: target-repo
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.22'
+
+      - name: Install protoc and Go plugins
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y protobuf-compiler
+          go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
+          go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
+          # Добавляем плагины в системный путь, чтобы protoc их нашел
+          echo "$(go env GOPATH)/bin" >> $GITHUB_PATH
+
+      - name: Generate gRPC Code
+        run: |
+          cd main-project
+          
+          # Запускаем стандартную команду генерации
+          protoc -I=proto \
+            --go_out=../target-repo --go_opt=paths=source_relative \
+            --go-grpc_out=../target-repo --go-grpc_opt=paths=source_relative \
+            proto/auth.proto proto/catalog.proto proto/streaming.proto
+
+      - name: Push to Target Repo
+        run: |
+          cd target-repo
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          
+          git add .
+          
+          if git diff-index --quiet HEAD --; then
+            echo "Нет изменений в .proto файлах. Пропуск."
+          else
+            git commit -m "Автоматическая генерация gRPC (protoc)"
+            git push origin main
+          fi
