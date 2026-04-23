@@ -35,7 +35,7 @@ message TrendingItem {
   int64 song_id = 1;
   int64 total_plays = 2;
 }
-
+ 
 message GetTrendingResponse {
   repeated TrendingItem items = 1;
 }
