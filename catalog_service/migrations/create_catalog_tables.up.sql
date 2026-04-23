@@ -17,8 +17,10 @@ CREATE TABLE songs (
     artist_id BIGINT REFERENCES artists(id) ON DELETE CASCADE,
     album_id BIGINT REFERENCES albums(id) ON DELETE SET NULL,
     duration_seconds INT NOT NULL,
+    genre VARCHAR(100),
     cover_image_url VARCHAR(512)
 );
 
 CREATE INDEX idx_songs_title ON songs(title);
 CREATE INDEX idx_artists_name ON artists(name);
+CREATE INDEX idx_songs_genre ON songs(genre);
