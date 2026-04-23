@@ -7,45 +7,119 @@ service AuthService {
   rpc Register (RegisterRequest) returns (RegisterResponse);
   rpc Login (LoginRequest) returns (LoginResponse);
   rpc ValidateToken (ValidateTokenRequest) returns (ValidateTokenResponse);
-  rpc GetUserProfile (GetUserProfileRequest) returns (GetUserProfileResponse);
+  rpc RefreshToken (RefreshTokenRequest) returns (RefreshTokenResponse);
+  rpc ChangePassword (ChangePasswordRequest) returns (SuccessResponse);
+  rpc SendPasswordReset (SendResetRequest) returns (SuccessResponse);
+  rpc ConfirmPasswordReset (ConfirmResetRequest) returns (SuccessResponse);
+
+  rpc GetProfile (GetProfileRequest) returns (GetProfileResponse);
+  rpc UpdateProfile (UpdateProfileRequest) returns (SuccessResponse);
+  rpc DeleteAccount (DeleteAccountRequest) returns (SuccessResponse);
+
+  rpc ListUsers (ListUsersRequest) returns (ListUsersResponse);
+  rpc UpdateUserRole (UpdateUserRoleRequest) returns (SuccessResponse);
 }
 
-message RegisterRequest {
-  string email = 1;
-  string password = 2;
-  string display_name = 3;
+message SuccessResponse {
+  bool success = 1;
+  string message = 2;
 }
 
-message RegisterResponse {
-  int64 user_id = 1;
-}
- 
-message LoginRequest {
-  string email = 1;
-  string password = 2;
+message RegisterRequest { 
+  string email = 1; 
+  string password = 2; 
+  string display_name = 3; 
 }
 
-message LoginResponse {
-  string access_token = 1;
-  int64 user_id = 2;
+message RegisterResponse { 
+  int64 user_id = 1; 
 }
 
-message ValidateTokenRequest {
-  string access_token = 1;
+message LoginRequest { 
+  string email = 1; 
+  string password = 2; 
 }
 
-message ValidateTokenResponse {
-  bool is_valid = 1;
-  int64 user_id = 2;
-  string role = 3;
+message LoginResponse { 
+  string access_token = 1; 
+  string refresh_token = 2; 
+  int64 user_id = 3; 
 }
 
-message GetUserProfileRequest {
-  int64 user_id = 1;
+message ValidateTokenRequest { 
+  string access_token = 1; 
 }
 
-message GetUserProfileResponse {
-  int64 user_id = 1;
-  string display_name = 2;
-  string created_at = 3;
+message ValidateTokenResponse { 
+  bool is_valid = 1; 
+  int64 user_id = 2; 
+  string role = 3; 
+}
+
+message RefreshTokenRequest { 
+  string refresh_token = 1; 
+}
+
+message RefreshTokenResponse { 
+  string access_token = 1; 
+  string refresh_token = 2; 
+}
+
+message ChangePasswordRequest { 
+  int64 user_id = 1; 
+  string old_password = 2; 
+  string new_password = 3; 
+}
+
+message SendResetRequest { 
+  string email = 1; 
+}
+
+message ConfirmResetRequest { 
+  string email = 1; 
+  string reset_code = 2; 
+  string new_password = 3; 
+}
+
+message GetProfileRequest { 
+  int64 user_id = 1; 
+}
+
+message GetProfileResponse { 
+  int64 user_id = 1; 
+  string email = 2; 
+  string display_name = 3; 
+  string role = 4; 
+}
+
+message UpdateProfileRequest { 
+  int64 user_id = 1; 
+  string display_name = 2; 
+  string avatar_url = 3; 
+}
+
+message DeleteAccountRequest { 
+  int64 user_id = 1; 
+}
+
+message ListUsersRequest { 
+  int32 limit = 1; 
+  int32 offset = 2; 
+}
+
+message UserItem { 
+  int64 id = 1; 
+  string email = 2; 
+  string display_name = 3; 
+  string role = 4; 
+}
+
+message ListUsersResponse { 
+  repeated UserItem users = 1; 
+}
+
+message UpdateUserRoleRequest { 
+  int64 admin_id = 1; 
+  int64 target_user_id = 2; 
+  string new_role = 3; 
 }

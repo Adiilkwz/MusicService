@@ -4,57 +4,147 @@ package catalog;
 option go_package = "github.com/Adiilkwz/music-grpc-go/catalog";
 
 service CatalogService {
-  rpc GetSongDetails (GetSongRequest) returns (GetSongResponse);
-  rpc SearchCatalog (SearchRequest) returns (SearchResponse);
-  rpc ListArtistAlbums (ListAlbumsRequest) returns (ListAlbumsResponse);
-  rpc AddSong (AddSongRequest) returns (AddSongResponse);
+  rpc CreateArtist (CreateArtistRequest) returns (CreateArtistResponse);
+  rpc GetArtist (GetArtistRequest) returns (GetArtistResponse);
+  rpc GetAlbumsByArtist (GetAlbumsByArtistRequest) returns (GetAlbumsByArtistResponse);
+
+  rpc CreateAlbum (CreateAlbumRequest) returns (CreateAlbumResponse);
+  rpc GetAlbum (GetAlbumRequest) returns (GetAlbumResponse);
+  rpc GetSongsByAlbum (GetSongsByAlbumRequest) returns (GetSongsByAlbumResponse);
+
+  rpc CreateSong (CreateSongRequest) returns (CreateSongResponse);
+  rpc GetSong (GetSongRequest) returns (GetSongResponse);
+  rpc UpdateSong (UpdateSongRequest) returns (SuccessResponse);
+  rpc DeleteSong (DeleteSongRequest) returns (SuccessResponse);
+  rpc GetSongsByGenre (GetSongsByGenreRequest) returns (GetSongsByGenreResponse);
+
+  rpc SearchCatalog (SearchCatalogRequest) returns (SearchCatalogResponse);
 }
 
-message Song {
-  int64 id = 1;
-  string title = 2;
-  string artist_name = 3;
-  string cover_image_url = 4;
-  int32 duration_seconds = 5;
+message SuccessResponse { 
+  bool success = 1; 
 }
 
-message GetSongRequest {
-  int64 song_id = 1;
-}
- 
-message GetSongResponse {
-  Song song = 1;
+message Artist { 
+  int64 id = 1; 
+  string name = 2; 
+  string bio = 3; 
 }
 
-message SearchRequest {
-  string query = 1;
-  int32 limit = 2;
+message Album { 
+  int64 id = 1; 
+  int64 artist_id = 2; 
+  string title = 3; 
+  int32 release_year = 4; 
 }
 
-message SearchResponse {
-  repeated Song songs = 1;
+message Song { 
+  int64 id = 1; 
+  int64 album_id = 2; 
+  string title = 3; 
+  int32 duration = 4; 
+  string genre = 5; 
 }
 
-message ListAlbumsRequest {
-  int64 artist_id = 1;
+message CreateArtistRequest { 
+  string name = 1; 
+  string bio = 2; 
 }
 
-message Album {
-  int64 id = 1;
-  string title = 2;
-  string release_year = 3;
+message CreateArtistResponse { 
+  int64 id = 1; 
 }
 
-message ListAlbumsResponse {
-  repeated Album albums = 1;
+message GetArtistRequest { 
+  int64 id = 1; 
 }
 
-message AddSongRequest {
-  string title = 1;
-  int64 artist_id = 2;
-  int32 duration_seconds = 3;
+message GetArtistResponse { 
+  Artist artist = 1; 
 }
 
-message AddSongResponse {
-  int64 new_song_id = 1;
+message GetAlbumsByArtistRequest { 
+  int64 artist_id = 1; 
+}
+
+message GetAlbumsByArtistResponse { 
+  repeated Album albums = 1; 
+}
+
+message CreateAlbumRequest { 
+  int64 artist_id = 1; 
+  string title = 2; 
+  int32 release_year = 3; 
+}
+
+message CreateAlbumResponse { 
+  int64 id = 1; 
+}
+
+message GetAlbumRequest { 
+  int64 id = 1; 
+}
+
+message GetAlbumResponse { 
+  Album album = 1; 
+  string artist_name = 2; 
+}
+
+message GetSongsByAlbumRequest { 
+  int64 album_id = 1; 
+}
+
+message GetSongsByAlbumResponse { 
+  repeated Song songs = 1; 
+}
+
+message CreateSongRequest { 
+  int64 album_id = 1; 
+  string title = 2; 
+  int32 duration = 3; 
+  string genre = 4; 
+}
+
+message CreateSongResponse { 
+  int64 id = 1; 
+}
+
+message GetSongRequest { 
+  int64 id = 1; 
+}
+
+message GetSongResponse { 
+  Song song = 1; 
+  string artist_name = 2; 
+  string album_title = 3; 
+}
+
+message UpdateSongRequest { 
+  int64 id = 1; 
+  string title = 2; 
+  string genre = 3; 
+}
+
+message DeleteSongRequest { 
+  int64 id = 1; 
+}
+
+message GetSongsByGenreRequest { 
+  string genre = 1; 
+  int32 limit = 2; 
+}
+
+message GetSongsByGenreResponse { 
+  repeated Song songs = 1; 
+}
+
+message SearchCatalogRequest { 
+  string query = 1; 
+  int32 limit = 2; 
+}
+
+message SearchCatalogResponse {
+  repeated Artist artists = 1;
+  repeated Album albums = 2;
+  repeated Song songs = 3;
 }

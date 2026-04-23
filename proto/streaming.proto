@@ -5,51 +5,104 @@ option go_package = "github.com/Adiilkwz/music-grpc-go/streaming";
 
 service StreamingService {
   rpc StreamAudio (StreamRequest) returns (stream StreamResponse);
-  rpc RecordPlay (RecordPlayRequest) returns (RecordPlayResponse);
-  rpc GetTrending (GetTrendingRequest) returns (GetTrendingResponse);
-  rpc GetUserHistory (GetHistoryRequest) returns (GetHistoryResponse);
+  rpc RecordPlay (RecordPlayRequest) returns (SuccessResponse);
+  rpc GetUserHistory (GetUserHistoryRequest) returns (GetUserHistoryResponse);
+  rpc GetTrendingSongs (GetTrendingRequest) returns (GetTrendingResponse);
+
+  rpc CreatePlaylist (CreatePlaylistRequest) returns (CreatePlaylistResponse);
+  rpc GetPlaylist (GetPlaylistRequest) returns (GetPlaylistResponse);
+  rpc AddSongToPlaylist (ModifyPlaylistRequest) returns (SuccessResponse);
+  rpc RemoveSongFromPlaylist (ModifyPlaylistRequest) returns (SuccessResponse);
+  rpc DeletePlaylist (DeletePlaylistRequest) returns (SuccessResponse);
+
+  rpc LikeSong (LikeSongRequest) returns (SuccessResponse);
+  rpc UnlikeSong (LikeSongRequest) returns (SuccessResponse);
+  rpc GetLikedSongs (GetLikedSongsRequest) returns (GetLikedSongsResponse);
 }
 
-message StreamRequest {
-  int64 song_id = 1;
+message SuccessResponse { 
+  bool success = 1; 
 }
 
-message StreamResponse {
-  bytes audio_chunk = 1;
+message StreamRequest { 
+  int64 song_id = 1; 
 }
 
-message RecordPlayRequest {
-  int64 user_id = 1;
-  int64 song_id = 2;
+message StreamResponse { 
+  bytes audio_chunk = 1; 
 }
 
-message RecordPlayResponse {
-  bool success = 1;
+message RecordPlayRequest { 
+  int64 user_id = 1; 
+  int64 song_id = 2; 
 }
 
-message GetTrendingRequest {
-  int32 limit = 1;
+message GetUserHistoryRequest { 
+  int64 user_id = 1; 
+  int32 limit = 2; 
 }
 
-message TrendingItem {
-  int64 song_id = 1;
-  int64 total_plays = 2;
-}
- 
-message GetTrendingResponse {
-  repeated TrendingItem items = 1;
+message HistoryItem { 
+  int64 song_id = 1; 
+  string played_at = 2; 
 }
 
-message GetHistoryRequest {
-  int64 user_id = 1;
-  int32 limit = 2;
+message GetUserHistoryResponse { 
+  repeated HistoryItem history = 1; 
 }
 
-message HistoryItem {
-  int64 song_id = 1;
-  string played_at = 2;
+message GetTrendingRequest { 
+  int32 limit = 1; 
 }
 
-message GetHistoryResponse {
-  repeated HistoryItem history = 1;
+message TrendingItem { 
+  int64 song_id = 1; 
+  int32 play_count = 2; 
+}
+
+message GetTrendingResponse { 
+  repeated TrendingItem items = 1; 
+}
+
+message CreatePlaylistRequest { 
+  int64 user_id = 1; 
+  string title = 2; 
+}
+
+message CreatePlaylistResponse { 
+  int64 playlist_id = 1; 
+}
+
+message GetPlaylistRequest { 
+  int64 playlist_id = 1; 
+}
+
+message GetPlaylistResponse { 
+  int64 playlist_id = 1; 
+  string title = 2; 
+  repeated int64 song_ids = 3; 
+}
+
+message ModifyPlaylistRequest { 
+  int64 playlist_id = 1; 
+  int64 song_id = 2; 
+}
+
+message DeletePlaylistRequest { 
+  int64 playlist_id = 1; 
+}
+
+message LikeSongRequest { 
+  int64 user_id = 1; 
+  int64 song_id = 2; 
+}
+
+message GetLikedSongsRequest { 
+  int64 user_id = 1; 
+  int32 limit = 2; 
+  int32 offset = 3; 
+}
+
+message GetLikedSongsResponse { 
+  repeated int64 song_ids = 1; 
 }
