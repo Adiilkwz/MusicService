@@ -41,10 +41,9 @@ jobs:
         run: |
           cd main-project
           
-          # Запускаем стандартную команду генерации
           protoc -I=proto \
-            --go_out=../target-repo --go_opt=paths=source_relative \
-            --go-grpc_out=../target-repo --go-grpc_opt=paths=source_relative \
+            --go_out=../target-repo --go_opt=module=github.com/Adiilkwz/music-grpc-go \
+            --go-grpc_out=../target-repo --go-grpc_opt=module=github.com/Adiilkwz/music-grpc-go \
             proto/auth.proto proto/catalog.proto proto/streaming.proto
 
       - name: Push to Target Repo
