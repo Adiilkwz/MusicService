@@ -24,7 +24,7 @@ type Song struct {
 }
 
 type SearchResult struct {
-	Artist []Artist
+	Artists []Artist
 	Albums []Album
 	Songs  []Song
 }
