@@ -1,8 +1,9 @@
 package postgres
 
 import (
-	"context"
 	"catalog_service/internal/domain"
+	"context"
+
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -20,6 +21,32 @@ func (r *songRepo) Create(ctx context.Context, s *domain.Song) (int64, error) {
 	var id int64
 	err := r.db.QueryRow(ctx, query, s.Title, s.ArtistID, s.AlbumID, s.DurationSeconds, s.Genre).Scan(&id)
 	return id, err
+}
+
+func (r *songRepo) GetByAlbumID(ctx context.Context, albumID int64) ([]domain.Song, error) {
+	query := `SELECT id, title, artist_id, album_id, duration_seconds, genre 
+              FROM songs WHERE album_id = $1`
+
+	rows, err := r.db.Query(ctx, query, albumID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var songs []domain.Song
+	for rows.Next() {
+		var s domain.Song
+		if err := rows.Scan(&s.ID, &s.Title, &s.ArtistID, &s.AlbumID, &s.DurationSeconds, &s.Genre); err != nil {
+			return nil, err
+		}
+		songs = append(songs, s)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return songs, nil
 }
 
 func (r *songRepo) GetByID(ctx context.Context, id int64) (*domain.Song, error) {

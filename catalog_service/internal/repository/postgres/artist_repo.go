@@ -1,50 +1,62 @@
 package postgres
 
-import( 
+import (
 	"context"
 
 	"catalog_service/internal/domain"
+
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-type albumRepo struct {
+type artistRepo struct {
 	db *pgxpool.Pool
 }
 
-func NewAlbumRepository(db *pgxpool.Pool) domain.AlbumRepository {
-	return &albumRepo{db: db}
+func NewArtistRepository(db *pgxpool.Pool) domain.ArtistRepository {
+	return &artistRepo{db: db}
 }
 
-func (r *albumRepo) Create(ctx context.Context, album *domain.Album) (int64, error) {
-	query := `INSERT INTO albums (title, artist_id, release_year) VALUES ($1, $2, $3) RETURNING id`
+func (r *artistRepo) Create(ctx context.Context, artist *domain.Artist) (int64, error) {
+	query := `INSERT INTO artists (name, bio) VALUES ($1, $2) RETURNING id`
+
 	var id int64
-	err := r.db.QueryRow(ctx, query, album.Title, album.ArtistID, album.Year).Scan(&id)
-	return a, err
+	err := r.db.QueryRow(ctx, query, artist.Name, artist.Bio).Scan(&id)
+	if err != nil {
+		return 0, err
+	}
+
+	return id, nil
 }
 
-func (r *albumRepo) GetByID(ctx context.Context, id int64) (*domain.Album, error) {
-	query := `SELECT id, title, artist_id, release_year FROM albums WHERE id = $1`
-	a := &domain.Album{}
-	err := r.db.QueryRow(ctx, query, id).Scan(&a.ID, &a.Title, &a.ArtistID, &a.ReleaseYear)
-	return a, err
+func (r *artistRepo) GetByID(ctx context.Context, id int64) (*domain.Artist, error) {
+	query := `SELECT id, name, bio FROM artists WHERE id = $1`
+
+	artist := &domain.Artist{}
+	err := r.db.QueryRow(ctx, query, id).Scan(&artist.ID, &artist.Name, &artist.Bio)
+	if err != nil {
+		return nil, err
+	}
+
+	return artist, nil
 }
 
-func (r *albumRepo) GetByArtistID(ctx context.Context, artistID int64) ([]domain.Album, error) {
-	query := `SELECT id, title, artist_id, release_year FROM albums WHERE artist_id = $1`
-	rows, err := r.db.Query(ctx, query, artistID)
+func (r *artistRepo) Search(ctx context.Context, query string, limit int32) ([]domain.Artist, error) {
+	sqlQuery := `SELECT id, name, bio FROM artists WHERE name ILIKE '%' || $1 || '%' LIMIT $2`
+
+	rows, err := r.db.Query(ctx, sqlQuery, query, limit)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
-	var albums []domain.Album
+	var artists []domain.Artist
 	for rows.Next() {
-		a := domain.Album{}
-		err := rows.Scan(&a.ID, &a.Title, &a.ArtistID, &a.ReleaseYear)
-		if err != nil {
+		var a domain.Artist
+		if err := rows.Scan(&a.ID, &a.Name, &a.Bio); err != nil {
 			return nil, err
 		}
-		albums = append(albums, a)
+		artists = append(artists, a)
 	}
-	return albums, nil
+
+	return artists, nil
 }
