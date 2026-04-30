@@ -6,8 +6,8 @@ import (
 	"log"
 
 	"streaming_service/internal/domain"
-	pb "streaming_service/proto"
-	"google.golang.org/grpc"
+
+	pb "github.com/Adiilkwz/music-grpc-go/streaming"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -97,7 +97,7 @@ func (s *StreamingServer) GetTrending(ctx context.Context, req *pb.GetTrendingRe
 
 // PlaylistServiceServer implementation
 type PlaylistServer struct {
-	pb.UnimplementedPlaylistServiceServer
+	pb.UnimplementedStreamingServiceServer
 	usecase domain.PlaylistUsecase
 }
 
@@ -120,8 +120,8 @@ func (s *PlaylistServer) GetPlaylist(ctx context.Context, req *pb.GetPlaylistReq
 	}
 	return &pb.GetPlaylistResponse{
 		PlaylistId: playlist.ID,
-		Title:       playlist.Title,
-		SongIds:     playlist.SongIDs,
+		Title:      playlist.Title,
+		SongIds:    playlist.SongIDs,
 	}, nil
 }
 
@@ -151,7 +151,7 @@ func (s *PlaylistServer) DeletePlaylist(ctx context.Context, req *pb.DeletePlayl
 
 // LikeServiceServer implementation
 type LikeServer struct {
-	pb.UnimplementedLikeServiceServer
+	pb.UnimplementedStreamingServiceServer
 	usecase domain.LikeUsecase
 }
 
