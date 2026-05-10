@@ -13,6 +13,7 @@ type Config struct {
 	DBPassword    string
 	DBName        string
 	AudioDir      string
+	NATSUrl       string
 }
 
 func Load() *Config {
@@ -24,6 +25,7 @@ func Load() *Config {
 		DBPassword:    getEnv("DB_PASSWORD", "postgres"),
 		DBName:        getEnv("DB_NAME", "music_service"),
 		AudioDir:      getEnv("AUDIO_DIR", "./audio_files"),
+		NATSUrl:       getEnv("NATS_URL", "nats://localhost:4222"),
 	}
 }
 

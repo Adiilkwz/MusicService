@@ -10,6 +10,7 @@ import (
 	"google.golang.org/grpc/status"
 
 	"streaming_service/config"
+	"streaming_service/internal/repository/nats"
 	"streaming_service/internal/repository/postgres"
 	"streaming_service/internal/usecase"
 )
@@ -237,13 +238,22 @@ func main() {
 	}
 	defer db.Close()
 
+	// Initialize NATS event publisher
+	eventPublisher, err := nats.NewEventPublisher(cfg.NATSUrl)
+	if err != nil {
+		log.Printf("Warning: Failed to connect to NATS, events won't be published: %v", err)
+	}
+	if eventPublisher != nil {
+		defer eventPublisher.Close()
+	}
+
 	historyRepo := postgres.NewHistoryRepository(db)
 	playlistRepo := postgres.NewPlaylistRepository(db)
 	likeRepo := postgres.NewLikeRepository(db)
 	trendingRepo := postgres.NewTrendingRepository(db)
 	audioRepo := postgres.NewAudioRepository(cfg.AudioDir)
 
-	streamingUsecase := usecase.NewStreamingUsecase(historyRepo, trendingRepo, audioRepo)
+	streamingUsecase := usecase.NewStreamingUsecase(historyRepo, trendingRepo, audioRepo, eventPublisher)
 	playlistUsecase := usecase.NewPlaylistUsecase(playlistRepo)
 	likeUsecase := usecase.NewLikeUsecase(likeRepo)
 

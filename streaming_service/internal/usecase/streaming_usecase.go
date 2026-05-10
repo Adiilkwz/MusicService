@@ -4,6 +4,7 @@ import (
 	"context"
 	"io"
 	"os"
+	"time"
 
 	"streaming_service/internal/domain"
 )
@@ -12,17 +13,20 @@ type streamingUsecase struct {
 	historyRepo   domain.HistoryRepository
 	trendingRepo   domain.TrendingRepository
 	audioRepo      domain.AudioRepository
+	eventPublisher domain.EventPublisher
 }
 
 func NewStreamingUsecase(
 	historyRepo domain.HistoryRepository,
 	trendingRepo domain.TrendingRepository,
 	audioRepo domain.AudioRepository,
+	eventPublisher domain.EventPublisher,
 ) domain.StreamingUsecase {
 	return &streamingUsecase{
-		historyRepo:  historyRepo,
+		historyRepo:   historyRepo,
 		trendingRepo: trendingRepo,
 		audioRepo:    audioRepo,
+		eventPublisher: eventPublisher,
 	}
 }
 
@@ -50,7 +54,21 @@ func (u *streamingUsecase) RecordPlay(ctx context.Context, userID, songID int64)
 	}
 	
 	// Increment trending play count
-	return u.trendingRepo.IncrementPlayCount(ctx, songID)
+	if err := u.trendingRepo.IncrementPlayCount(ctx, songID); err != nil {
+		return err
+	}
+
+	// Publish async event (non-blocking, won't fail the request)
+	go func() {
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+		if err := u.eventPublisher.PublishSongPlayed(ctx, userID, songID); err != nil {
+			// Log error but don't fail
+			return
+		}
+	}()
+
+	return nil
 }
 
 func (u *streamingUsecase) GetUserHistory(ctx context.Context, userID int64, limit int) ([]domain.History, error) {
