@@ -2,29 +2,30 @@ package grpc
 
 import (
 	"streaming_service/internal/domain"
+
+	pb "github.com/Adiilkwz/music-grpc-go/streaming"
 	"google.golang.org/grpc"
 )
 
-type Server struct {
-	streamingServer *StreamingServer
-	playlistServer   *PlaylistServer
-	likeServer       *LikeServer
+type Handler struct {
+	pb.UnimplementedStreamingServiceServer
+	streamingUC domain.StreamingUsecase
+	playlistUC  domain.PlaylistUsecase
+	likeUC      domain.LikeUsecase
 }
 
-func NewServer(
-	streamingUsecase domain.StreamingUsecase,
-	playlistUsecase domain.PlaylistUsecase,
-	likeUsecase domain.LikeUsecase,
-) *Server {
-	return &Server{
-		streamingServer: NewStreamingServer(streamingUsecase),
-		playlistServer:   NewPlaylistServer(playlistUsecase),
-		likeServer:       NewLikeServer(likeUsecase),
+func NewHandler(
+	streamingUC domain.StreamingUsecase,
+	playlistUC domain.PlaylistUsecase,
+	likeUC domain.LikeUsecase,
+) *Handler {
+	return &Handler{
+		streamingUC: streamingUC,
+		playlistUC:  playlistUC,
+		likeUC:      likeUC,
 	}
 }
 
-func (s *Server) Register(server *grpc.Server) {
-	RegisterStreamingServiceServer(server, s.streamingServer)
-	RegisterPlaylistServiceServer(server, s.playlistServer)
-	RegisterLikeServiceServer(server, s.likeServer)
+func Register(server *grpc.Server, h *Handler) {
+	pb.RegisterStreamingServiceServer(server, h)
 }

@@ -6,26 +6,28 @@ import (
 )
 
 type Config struct {
-	ServerPort    string
-	DBHost        string
-	DBPort        int
-	DBUser        string
-	DBPassword    string
-	DBName        string
-	AudioDir      string
-	NATSUrl       string
+	ServerPort     string
+	DBHost         string
+	DBPort         int
+	DBUser         string
+	DBPassword     string
+	DBName         string
+	AudioDir       string
+	NATSUrl        string
+	AuthServiceUrl string
 }
 
 func Load() *Config {
 	return &Config{
-		ServerPort:    getEnv("STREAMING_SERVER_PORT", "50051"),
-		DBHost:        getEnv("DB_HOST", "localhost"),
-		DBPort:        getEnvAsInt("DB_PORT", 5432),
-		DBUser:        getEnv("DB_USER", "postgres"),
-		DBPassword:    getEnv("DB_PASSWORD", "postgres"),
-		DBName:        getEnv("DB_NAME", "music_service"),
-		AudioDir:      getEnv("AUDIO_DIR", "./audio_files"),
-		NATSUrl:       getEnv("NATS_URL", "nats://localhost:4222"),
+		ServerPort:     getEnv("STREAMING_SERVER_PORT", "50052"),
+		DBHost:         getEnv("DB_HOST", "localhost"),
+		DBPort:         getEnvAsInt("DB_PORT", 5432),
+		DBUser:         getEnv("DB_USER", "postgres"),
+		DBPassword:     getEnv("DB_PASSWORD", "postgres"),
+		DBName:         getEnv("DB_NAME", "music_service"),
+		AudioDir:       getEnv("AUDIO_DIR", "./audio_files"),
+		NATSUrl:        getEnv("NATS_URL", "nats://localhost:4222"),
+		AuthServiceUrl: getEnv("AUTH_SERVICE_URL", "localhost:50051"),
 	}
 }
 
