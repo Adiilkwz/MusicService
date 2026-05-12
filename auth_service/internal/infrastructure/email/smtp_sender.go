@@ -24,15 +24,15 @@ func NewSMTPSender(host, port, from, password string) domain.EmailSender {
 }
 
 func (s *smtpSender) SendWelcomeEmail(toEmail, displayName string) error {
-	subject := "Добро пожаловать в Music Streaming!"
-	body := fmt.Sprintf("Привет, %s!\n\nСпасибо за регистрацию в нашем сервисе. Наслаждайся музыкой!", displayName)
+	subject := "Welcome to Music Streaming!"
+	body := fmt.Sprintf("Hi, %s!\n\nThank you for joining us. Enjoy music!", displayName)
 
 	return s.sendMail(toEmail, subject, body)
 }
 
 func (s *smtpSender) SendPasswordResetEmail(toEmail, resetCode string) error {
-	subject := "Восстановление пароля"
-	body := fmt.Sprintf("Ваш код для восстановления пароля: %s\n\nЕсли вы не запрашивали сброс пароля, проигнорируйте это письмо.", resetCode)
+	subject := "Passworkd Reset"
+	body := fmt.Sprintf("Your code to reser password: %s\n\nIf you did not request for password reset, ignore this message.", resetCode)
 
 	return s.sendMail(toEmail, subject, body)
 }

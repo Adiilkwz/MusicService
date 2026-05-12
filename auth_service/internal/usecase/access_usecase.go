@@ -98,7 +98,7 @@ func (u *accessUsecase) ValidateToken(ctx context.Context, accessToken string) (
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 		}
-		return u.jwtSecret, nil
+		return []byte(u.jwtSecret), nil
 	})
 
 	if err != nil || !token.Valid {
