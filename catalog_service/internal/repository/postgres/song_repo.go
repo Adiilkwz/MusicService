@@ -106,7 +106,7 @@ func (r *songRepo) Search(ctx context.Context, query string, limit int32) ([]dom
 	return songs, nil
 }
 
-func (r *songRepo) IncrementPlays(ctx context.Context, id int64) error {
+func (r *songRepo) IncrementSongPlays(ctx context.Context, id int64) error {
 	query := `UPDATE songs SET plays_count = plays_count + 1 WHERE id = $1`
 	_, err := r.db.Exec(ctx, query, id)
 	return err

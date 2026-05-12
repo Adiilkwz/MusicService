@@ -20,6 +20,8 @@ type SongUsecase interface {
 	UpdateSong(ctx context.Context, id int64, title, genre string) error
 	DeleteSong(ctx context.Context, id int64) error
 	GetSongsByGenre(ctx context.Context, genre string, limit int32) ([]Song, error)
+
+	IncrementSongPlays(ctx context.Context, id int64) error
 }
 
 type SearchUsecase interface {

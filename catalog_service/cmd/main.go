@@ -17,10 +17,20 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	google_grpc "google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
+
+	"catalog_service/internal/worker"
+
+	"github.com/nats-io/nats.go"
 )
 
 func main() {
 	cfg := config.Load()
+
+	nc, err := nats.Connect(cfg.NatsURL)
+	if err != nil {
+		log.Fatalf("Ошибка подключения к NATS: %v", err)
+	}
+	defer nc.Close()
 
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
@@ -44,6 +54,9 @@ func main() {
 	albumUC := usecase.NewAlbumUsecase(albumRepo, songRepo)
 	songUC := usecase.NewSongUsecase(songRepo)
 	searchUC := usecase.NewSearchUsecase(artistRepo, albumRepo, songRepo)
+
+	natsWorker := worker.NewNatsWorker(nc, songUC)
+	go natsWorker.Start(ctx)
 
 	lis, err := net.Listen("tcp", ":"+cfg.GRPCPort)
 	if err != nil {

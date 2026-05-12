@@ -24,7 +24,7 @@ type SongRepository interface {
 	GetByGenre(ctx context.Context, genre string, limit int32) ([]Song, error)
 	Search(ctx context.Context, query string, limit int32) ([]Song, error)
 
-	IncrementPlays(ctx context.Context, id int64) error
+	IncrementSongPlays(ctx context.Context, id int64) error
 }
 
 type CacheRepository interface {
