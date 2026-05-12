@@ -6,12 +6,12 @@ import (
 	"github.com/Adiilkwz/music-grpc-go/catalog"
 )
 
-func (s *Server) CreateArtist(ctx context.Context, req *catalog.CreateArtistRequest) (*catalog.CreatArtistResponse, error) {
+func (s *Server) CreateArtist(ctx context.Context, req *catalog.CreateArtistRequest) (*catalog.CreateArtistResponse, error) {
 	id, err := s.artistUC.CreateArtist(ctx, req.GetName(), req.GetBio())
 	if err != nil {
 		return nil, err
 	}
-	return &catalog.CreatArtistResponse{Id: id}, nil
+	return &catalog.CreateArtistResponse{Id: id}, nil
 }
 
 func (s *Server) GetArtist(ctx context.Context, req *catalog.GetArtistRequest) (*catalog.GetArtistResponse, error) {
