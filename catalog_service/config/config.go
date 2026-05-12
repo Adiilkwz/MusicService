@@ -17,6 +17,8 @@ type Config struct {
 
 	RedisAddr     string
 	RedisPassword string
+
+	NatsURL string
 }
 
 func Load() *Config {
@@ -31,6 +33,8 @@ func Load() *Config {
 
 		RedisAddr:     getEnv("REDIS_ADDR", "localhost:6379"),
 		RedisPassword: getEnv("REDIS_PASSWORD", ""),
+
+		NatsURL: getEnv("NATS_URL", "nats://localhost:4222"),
 	}
 }
 
