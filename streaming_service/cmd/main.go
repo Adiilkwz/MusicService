@@ -4,6 +4,7 @@ import (
 	"log"
 	"net"
 
+	"github.com/joho/godotenv"
 	"google.golang.org/grpc"
 
 	"streaming_service/config"
@@ -15,6 +16,10 @@ import (
 )
 
 func main() {
+	if err := godotenv.Load(); err != nil {
+		log.Println("Warning: No .env file found, reading from system env")
+	}
+
 	cfg := config.Load()
 
 	db, err := postgres.NewDB(cfg.DBHost, cfg.DBPort, cfg.DBUser, cfg.DBPassword, cfg.DBName)

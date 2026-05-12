@@ -4,8 +4,8 @@ import (
 	"database/sql"
 	"log"
 	"net"
-	"os"
 
+	"auth_service/internal/config"
 	"auth_service/internal/delivery/grpc"
 	"auth_service/internal/infrastructure/email"
 	"auth_service/internal/repository/postgres"
@@ -18,15 +18,13 @@ import (
 )
 
 func main() {
-	err := godotenv.Load()
-	if err != nil {
-		log.Println("Warning: No .env file found")
+	if err := godotenv.Load(); err != nil {
+		log.Println("Warning: No .env file found, reading from system env")
 	}
-	dbURL := os.Getenv("DATABASE_URL")
 
-	jwtSecret := os.Getenv("JWT_SECRET")
+	cfg := config.Load()
 
-	db, err := sql.Open("postgres", dbURL)
+	db, err := sql.Open("postgres", cfg.DatabaseURL)
 	if err != nil {
 		log.Fatalf("Failed to connect to database: %v", err)
 	}
@@ -37,25 +35,20 @@ func main() {
 	}
 	log.Println("Successfully connected to PostgreSQL!")
 
-	smtpHost := os.Getenv("SMTP_HOST")
-	smtpPort := os.Getenv("SMTP_PORT")
-	smtpUser := os.Getenv("SMTP_USER")
-	smtpPass := os.Getenv("SMTP_PASS")
-	emailSender := email.NewSMTPSender(smtpHost, smtpPort, smtpUser, smtpPass)
+	emailSender := email.NewSMTPSender(cfg.SMTPHost, cfg.SMTPPort, cfg.SMTPUser, cfg.SMTPPass)
 
 	userRepo := postgres.NewUserRepository(db)
 
-	accessUC := usecase.NewAccessUsecase(userRepo, jwtSecret, emailSender)
+	accessUC := usecase.NewAccessUsecase(userRepo, cfg.JWTSecret, emailSender)
 	profileUC := usecase.NewProfileUsecase(userRepo)
 	adminUC := usecase.NewAdminUsecase(userRepo)
 
 	authServer := grpc.NewAuthServer(accessUC, profileUC, adminUC)
 
 	grpcServer := grpc_lib.NewServer()
-
 	auth.RegisterAuthServiceServer(grpcServer, authServer)
 
-	port := ":50051"
+	port := ":" + cfg.GRPCPort
 	listener, err := net.Listen("tcp", port)
 	if err != nil {
 		log.Fatalf("Failed to listen on port %s: %v", port, err)
