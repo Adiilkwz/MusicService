@@ -21,6 +21,8 @@ type Song struct {
 	DurationSeconds int32  `db:"duration_seconds"`
 	Genre           string `db:"genre"`
 	CoverImageURL   string `db:"cover_image_url"`
+
+	PlaysCount int64 `db:"plays_count"`
 }
 
 type SearchResult struct {

@@ -45,3 +45,7 @@ func (u *songUsecase) DeleteSong(ctx context.Context, id int64) error {
 func (u *songUsecase) GetSongsByGenre(ctx context.Context, genre string, limit int32) ([]domain.Song, error) {
 	return u.songRepo.GetByGenre(ctx, genre, limit)
 }
+
+func (u *songUsecase) IncrementSongPlays(ctx context.Context, id int64) error {
+	return u.songRepo.IncrementPlays(ctx, id)
+}
