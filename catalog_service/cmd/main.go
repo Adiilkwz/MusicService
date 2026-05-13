@@ -11,10 +11,12 @@ import (
 	"catalog_service/config"
 	delivery_grpc "catalog_service/internal/delivery/grpc"
 	"catalog_service/internal/repository/postgres"
+	redis_repo "catalog_service/internal/repository/redis"
 	"catalog_service/internal/usecase"
 
 	"github.com/Adiilkwz/music-grpc-go/catalog"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/redis/go-redis/v9"
 	google_grpc "google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 
@@ -46,14 +48,27 @@ func main() {
 	}
 	log.Println("Успешное подключение к PostgreSQL")
 
+	redisClient := redis.NewClient(&redis.Options{
+		Addr:     cfg.RedisAddr,
+		Password: cfg.RedisPassword,
+		DB:       0,
+	})
+	defer redisClient.Close()
+
+	if err := redisClient.Ping(ctx).Err(); err != nil {
+		log.Fatalf("Redis недоступен: %v", err)
+	}
+	log.Println("Успешное подключение к Redis")
+
 	artistRepo := postgres.NewArtistRepository(dbPool)
 	albumRepo := postgres.NewAlbumRepository(dbPool)
 	songRepo := postgres.NewSongRepository(dbPool)
+	cacheRepo := redis_repo.NewCacheRepository(redisClient)
 
 	artistUC := usecase.NewArtistUsecase(artistRepo, albumRepo)
 	albumUC := usecase.NewAlbumUsecase(albumRepo, songRepo)
 	songUC := usecase.NewSongUsecase(songRepo)
-	searchUC := usecase.NewSearchUsecase(artistRepo, albumRepo, songRepo)
+	searchUC := usecase.NewSearchUsecase(artistRepo, albumRepo, songRepo, cacheRepo)
 
 	natsWorker := worker.NewNatsWorker(nc, songUC)
 	go natsWorker.Start(ctx)

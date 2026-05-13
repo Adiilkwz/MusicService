@@ -6,6 +6,7 @@ import (
 	"log"
 
 	"catalog_service/internal/domain"
+
 	"github.com/nats-io/nats.go"
 )
 
@@ -14,19 +15,19 @@ type SongPlayedEvent struct {
 }
 
 type NatsWorker struct {
-	nc         *nats.Conn
+	nc          *nats.Conn
 	songUseCase domain.SongUsecase
 }
 
 func NewNatsWorker(nc *nats.Conn, sUC domain.SongUsecase) *NatsWorker {
 	return &NatsWorker{
-		nc:         nc,
+		nc:          nc,
 		songUseCase: sUC,
 	}
 }
 
 func (w *NatsWorker) Start(ctx context.Context) {
-	_, err := w.nc.Subscribe("song.played", func(m *nats.Msg) {
+	_, err := w.nc.Subscribe("songs.played", func(m *nats.Msg) {
 		var event SongPlayedEvent
 		if err := json.Unmarshal(m.Data, &event); err != nil {
 			log.Printf("NATS: ошибка парсинга сообщения: %v", err)
@@ -40,7 +41,6 @@ func (w *NatsWorker) Start(ctx context.Context) {
 			log.Printf("NATS: не удалось обновить счетчик для песни %d: %v", event.SongID, err)
 		}
 	})
-
 	if err != nil {
 		log.Fatalf("NATS: ошибка подписки: %v", err)
 	}

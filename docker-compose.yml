@@ -1,51 +1,111 @@
 version: '3.8'
 
 services:
-  auth-db:
+  postgres-db:
     image: postgres:15-alpine
+    container_name: music-postgres
     environment:
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: secretpassword
-      POSTGRES_DB: auth_db
+      POSTGRES_PASSWORD: 3107
     ports:
-      - "5432:5432"
+      - "5435:5432"
     volumes:
-      - auth-data:/var/lib/postgresql/data
+      - pgdata:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - music-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
-  catalog-db:
-    image: postgres:15-alpine
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: secretpassword
-      POSTGRES_DB: catalog_db
-    ports:
-      - "5433:5432"
-    volumes:
-      - catalog-data:/var/lib/postgresql/data
-
-  redis:
-    image: redis:7-alpine
+  redis-cache:
+    image: redis:alpine
+    container_name: music-redis
     ports:
       - "6379:6379"
+    networks:
+      - music-net
 
-  streaming-db:
-    image: postgres:15-alpine
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: secretpassword
-      POSTGRES_DB: streaming_db
-    ports:
-      - "5434:5432"
-    volumes:
-      - streaming-data:/var/lib/postgresql/data
-
-  nats:
+  nats-broker:
     image: nats:alpine
+    container_name: music-nats
     ports:
       - "4222:4222"
-      - "8222:8222"
+    networks:
+      - music-net
+
+  auth-service:
+    build:
+      context: ./auth_service
+      dockerfile: Dockerfile
+    container_name: auth-service
+    env_file:
+      - ./auth_service/.env
+    environment:
+      - DATABASE_URL=postgres://postgres:3107@postgres-db:5432/auth_db?sslmode=disable
+    ports:
+      - "50051:50051"
+    depends_on:
+      postgres-db:
+        condition: service_healthy
+    networks:
+      - music-net
+
+  streaming-service:
+    build:
+      context: ./streaming_service
+      dockerfile: Dockerfile
+    container_name: streaming-service
+    env_file:
+      - ./streaming_service/.env
+    environment:
+      - DB_HOST=postgres-db
+      - DB_NAME=streaming_db
+      - NATS_URL=nats://nats-broker:4222
+      - AUTH_SERVICE_URL=auth-service:50051
+    ports:
+      - "50052:50052"
+    volumes:
+      - ./streaming_service/audio_files:/app/audio_files
+    depends_on:
+      postgres-db:
+        condition: service_healthy
+      nats-broker:
+        condition: service_started
+      auth-service:
+        condition: service_started
+    networks:
+      - music-net
+
+  catalog-service:
+    build:
+      context: ./catalog_service
+      dockerfile: Dockerfile
+    container_name: catalog-service
+    env_file:
+      - ./catalog_service/.env
+    environment:
+      - DB_HOST=postgres-db
+      - DB_NAME=catalog_db
+      - REDIS_ADDR=redis-cache:6379
+      - NATS_URL=nats://nats-broker:4222
+    ports:
+      - "50053:50053"
+    depends_on:
+      postgres-db:
+        condition: service_healthy
+      redis-cache:
+        condition: service_started
+      nats-broker:
+        condition: service_started
+    networks:
+      - music-net
 
 volumes:
-  auth-data:
-  catalog-data:
-  streaming-data:
+  pgdata:
+
+networks:
+  music-net:
+    driver: bridge
