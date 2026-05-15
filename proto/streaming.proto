@@ -33,12 +33,10 @@ message StreamResponse {
 }
 
 message RecordPlayRequest { 
-  int64 user_id = 1; 
   int64 song_id = 2; 
 }
 
 message GetUserHistoryRequest { 
-  int64 user_id = 1; 
   int32 limit = 2; 
 }
 
@@ -65,7 +63,6 @@ message GetTrendingResponse {
 }
 
 message CreatePlaylistRequest { 
-  int64 user_id = 1; 
   string title = 2; 
 }
 
@@ -93,12 +90,10 @@ message DeletePlaylistRequest {
 }
 
 message LikeSongRequest { 
-  int64 user_id = 1; 
   int64 song_id = 2; 
 }
 
 message GetLikedSongsRequest { 
-  int64 user_id = 1; 
   int32 limit = 2; 
   int32 offset = 3; 
 }

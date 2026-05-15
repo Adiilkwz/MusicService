@@ -81,8 +81,7 @@ message ConfirmResetRequest {
   string new_password = 3; 
 }
 
-message GetProfileRequest { 
-  int64 user_id = 1; 
+message GetProfileRequest {
 }
 
 message GetProfileResponse { 
@@ -98,8 +97,7 @@ message UpdateProfileRequest {
   string avatar_url = 3; 
 }
 
-message DeleteAccountRequest { 
-  int64 user_id = 1; 
+message DeleteAccountRequest {
 }
 
 message ListUsersRequest { 
@@ -119,7 +117,6 @@ message ListUsersResponse {
 }
 
 message UpdateUserRoleRequest { 
-  int64 admin_id = 1; 
-  int64 target_user_id = 2; 
-  string new_role = 3; 
+  int64 target_user_id = 1; 
+  string new_role = 2; 
 }
