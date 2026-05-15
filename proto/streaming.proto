@@ -90,12 +90,12 @@ message DeletePlaylistRequest {
 }
 
 message LikeSongRequest { 
-  int64 song_id = 2; 
+  int64 song_id = 1; 
 }
 
 message GetLikedSongsRequest { 
-  int32 limit = 2; 
-  int32 offset = 3; 
+  int32 limit = 1; 
+  int32 offset = 2; 
 }
 
 message GetLikedSongsResponse { 
