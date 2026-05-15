@@ -9,25 +9,40 @@ import (
 )
 
 func (h *Handler) LikeSong(ctx context.Context, req *pb.LikeSongRequest) (*pb.SuccessResponse, error) {
-	err := h.likeUC.LikeSong(ctx, req.UserId, req.SongId)
+	userID, err := extractUserID(ctx)
 	if err != nil {
-		return &pb.SuccessResponse{Success: false}, status.Errorf(codes.Internal, "failed to like song: %v", err)
+		return nil, err
+	}
+
+	err1 := h.likeUC.LikeSong(ctx, userID, req.SongId)
+	if err1 != nil {
+		return &pb.SuccessResponse{Success: false}, status.Errorf(codes.Internal, "failed to like song: %v", err1)
 	}
 	return &pb.SuccessResponse{Success: true}, nil
 }
 
 func (h *Handler) UnlikeSong(ctx context.Context, req *pb.LikeSongRequest) (*pb.SuccessResponse, error) {
-	err := h.likeUC.UnlikeSong(ctx, req.UserId, req.SongId)
+	userID, err := extractUserID(ctx)
 	if err != nil {
-		return &pb.SuccessResponse{Success: false}, status.Errorf(codes.Internal, "failed to unlike song: %v", err)
+		return nil, err
+	}
+
+	err1 := h.likeUC.UnlikeSong(ctx, userID, req.SongId)
+	if err1 != nil {
+		return &pb.SuccessResponse{Success: false}, status.Errorf(codes.Internal, "failed to unlike song: %v", err1)
 	}
 	return &pb.SuccessResponse{Success: true}, nil
 }
 
 func (h *Handler) GetLikedSongs(ctx context.Context, req *pb.GetLikedSongsRequest) (*pb.GetLikedSongsResponse, error) {
-	songIDs, err := h.likeUC.GetLikedSongs(ctx, req.UserId, int(req.Limit), int(req.Offset))
+	userID, err := extractUserID(ctx)
 	if err != nil {
-		return nil, status.Errorf(codes.Internal, "failed to get liked songs: %v", err)
+		return nil, err
+	}
+
+	songIDs, err1 := h.likeUC.GetLikedSongs(ctx, userID, int(req.Limit), int(req.Offset))
+	if err1 != nil {
+		return nil, status.Errorf(codes.Internal, "failed to get liked songs: %v", err1)
 	}
 	return &pb.GetLikedSongsResponse{SongIds: songIDs}, nil
 }

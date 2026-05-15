@@ -5,7 +5,7 @@ go 1.25.3
 require google.golang.org/grpc v1.80.0
 
 require (
-	github.com/Adiilkwz/music-grpc-go v0.0.0-20260423130308-ad4ffb16c29a
+	github.com/Adiilkwz/music-grpc-go v0.0.0-20260515053541-9b9596c09a7d
 	github.com/lib/pq v1.12.3
 	github.com/nats-io/nats.go v1.33.1
 	golang.org/x/net v0.49.0 // indirect

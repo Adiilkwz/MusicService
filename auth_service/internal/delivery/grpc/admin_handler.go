@@ -28,9 +28,14 @@ func (s *AuthServer) ListUsers(ctx context.Context, req *auth.ListUsersRequest) 
 }
 
 func (s *AuthServer) UpdateUserRole(ctx context.Context, req *auth.UpdateUserRoleRequest) (*auth.SuccessResponse, error) {
-	err := s.adminUC.UpdateUserRole(ctx, req.AdminId, req.TargetUserId, req.NewRole)
+	adminID, err := extractUserID(ctx)
 	if err != nil {
-		return nil, status.Error(codes.PermissionDenied, err.Error())
+		return nil, err
+	}
+
+	err1 := s.adminUC.UpdateUserRole(ctx, adminID, req.TargetUserId, req.NewRole)
+	if err1 != nil {
+		return nil, status.Error(codes.PermissionDenied, err1.Error())
 	}
 	return &auth.SuccessResponse{Success: true, Message: "User role updated"}, nil
 }

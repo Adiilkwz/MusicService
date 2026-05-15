@@ -7,6 +7,10 @@ import (
 )
 
 func (s *Server) CreateAlbum(ctx context.Context, req *catalog.CreateAlbumRequest) (*catalog.CreateAlbumResponse, error) {
+	if err := ensureHasRole(ctx, "admin", "artist"); err != nil {
+		return nil, err
+	}
+
 	id, err := s.albumUC.CreateAlbum(ctx, req.GetArtistId(), req.GetTitle(), req.GetReleaseYear())
 	if err != nil {
 		return nil, err

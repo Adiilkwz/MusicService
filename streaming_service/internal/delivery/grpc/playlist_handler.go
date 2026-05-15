@@ -9,9 +9,14 @@ import (
 )
 
 func (h *Handler) CreatePlaylist(ctx context.Context, req *pb.CreatePlaylistRequest) (*pb.CreatePlaylistResponse, error) {
-	playlistID, err := h.playlistUC.CreatePlaylist(ctx, req.UserId, req.Title)
+	userID, err := extractUserID(ctx)
 	if err != nil {
-		return nil, status.Errorf(codes.Internal, "failed to create playlist: %v", err)
+		return nil, err
+	}
+
+	playlistID, err1 := h.playlistUC.CreatePlaylist(ctx, userID, req.Title)
+	if err1 != nil {
+		return nil, status.Errorf(codes.Internal, "failed to create playlist: %v", err1)
 	}
 	return &pb.CreatePlaylistResponse{PlaylistId: playlistID}, nil
 }

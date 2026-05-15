@@ -3,7 +3,7 @@ module auth_service
 go 1.25.3
 
 require (
-	github.com/Adiilkwz/music-grpc-go v0.0.0-20260423130308-ad4ffb16c29a
+	github.com/Adiilkwz/music-grpc-go v0.0.0-20260515053541-9b9596c09a7d
 	github.com/golang-jwt/jwt/v5 v5.3.1
 	github.com/lib/pq v1.12.3
 	golang.org/x/crypto v0.50.0
