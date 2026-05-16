@@ -8,7 +8,6 @@ import (
 	"google.golang.org/grpc"
 
 	"streaming_service/config"
-	"streaming_service/internal/clients"
 	grpc_delivery "streaming_service/internal/delivery/grpc"
 	"streaming_service/internal/repository/nats"
 	"streaming_service/internal/repository/postgres"
@@ -36,11 +35,6 @@ func main() {
 		defer eventPublisher.Close()
 	}
 
-	authClient, err := clients.NewAuthClient(cfg.AuthServiceUrl)
-	if err != nil {
-		log.Fatalf("Failed to initialize auth client: %v", err)
-	}
-
 	historyRepo := postgres.NewHistoryRepository(db)
 	playlistRepo := postgres.NewPlaylistRepository(db)
 	likeRepo := postgres.NewLikeRepository(db)
@@ -53,9 +47,7 @@ func main() {
 
 	handler := grpc_delivery.NewHandler(streamingUsecase, playlistUsecase, likeUsecase)
 
-	server := grpc.NewServer(
-		grpc.UnaryInterceptor(grpc_delivery.AuthInterceptor(authClient)),
-	)
+	server := grpc.NewServer()
 
 	grpc_delivery.Register(server, handler)
 
