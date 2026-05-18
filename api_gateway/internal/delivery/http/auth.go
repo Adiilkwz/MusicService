@@ -40,6 +40,8 @@ func RegisterProtectedAuthRoutes(rg *gin.RouterGroup, client auth.AuthServiceCli
 	profileGroup := rg.Group("/profile")
 	{
 		profileGroup.GET("/", getProfileHandler(client))
+		profileGroup.PUT("/", updateProfileHandler(client))
+		profileGroup.DELETE("/", deleteAccountHandler(client))
 	}
 
 	adminGroup := rg.Group("/admin/users")
@@ -168,5 +170,40 @@ func updateUserRoleHandler(client auth.AuthServiceClient) gin.HandlerFunc {
 		}
 
 		c.JSON(http.StatusOK, gin.H{"message": "User role updated successfully"})
+	}
+}
+
+func updateProfileHandler(client auth.AuthServiceClient) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var input struct {
+			DisplayName string `json:"display_name"`
+			AvatarUrl   string `json:"avatar_url"`
+		}
+		if err := c.ShouldBindJSON(&input); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+		ctx := middleware.GetGrpcContext(c)
+		resp, err := client.UpdateProfile(ctx, &auth.UpdateProfileRequest{
+			DisplayName: input.DisplayName,
+			AvatarUrl:   input.AvatarUrl,
+		})
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": status.Convert(err).Message()})
+			return
+		}
+		c.JSON(http.StatusOK, resp)
+	}
+}
+
+func deleteAccountHandler(client auth.AuthServiceClient) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		ctx := middleware.GetGrpcContext(c)
+		resp, err := client.DeleteAccount(ctx, &auth.DeleteAccountRequest{})
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": status.Convert(err).Message()})
+			return
+		}
+		c.JSON(http.StatusOK, resp)
 	}
 }

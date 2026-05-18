@@ -2,6 +2,7 @@ package grpc
 
 import (
 	"context"
+	"fmt"
 	"strconv"
 
 	"github.com/Adiilkwz/music-grpc-go/auth"
@@ -12,6 +13,9 @@ import (
 
 func extractUserID(ctx context.Context) (int64, error) {
 	md, ok := metadata.FromIncomingContext(ctx)
+
+	fmt.Printf("[MICROSERVICE] Incoming Request Metadata: %v\n", md)
+
 	if !ok {
 		return 0, status.Error(codes.Unauthenticated, "Metadate is not found")
 	}

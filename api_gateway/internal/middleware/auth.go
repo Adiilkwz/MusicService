@@ -43,13 +43,17 @@ func AuthMiddleware(authClient auth.AuthServiceClient) gin.HandlerFunc {
 }
 
 func GetGrpcContext(c *gin.Context) context.Context {
-	md := metadata.New(map[string]string{})
+	md := metadata.Pairs()
 
 	if userID, exists := c.Get("user_id"); exists {
 		md.Set("user_id", fmt.Sprintf("%v", userID))
+		fmt.Println("[GATEWAY] Success: Attached user_id to gRPC metadata:", userID)
+	} else {
+		fmt.Println("[GATEWAY] FATAL: user_id was completely missing from Gin context!")
 	}
+
 	if role, exists := c.Get("user_role"); exists {
-		md.Set("user_role", fmt.Sprintf("%v", role))
+		md.Set("role", fmt.Sprintf("%v", role))
 	}
 
 	return metadata.NewOutgoingContext(context.Background(), md)

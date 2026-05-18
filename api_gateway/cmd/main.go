@@ -50,8 +50,8 @@ func main() {
 		protected.Use(middleware.AuthMiddleware(authClient))
 		{
 			http.RegisterStreamRoutes(protected, streamingClient, catalogClient)
-			http.RegisterProtectedAuthRoutes(api, authClient)
-			http.RegisterProtectedCatalogRoutes(api, catalogClient)
+			http.RegisterProtectedAuthRoutes(protected, authClient)
+			http.RegisterProtectedCatalogRoutes(protected, catalogClient)
 		}
 	}
 
