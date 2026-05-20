@@ -1,57 +1,91 @@
-import { useState } from 'react';
+import { useState } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
+import api from '../../services/api'
+import { useAuth } from '../../contexts/AuthContext'
+import { useToast } from '../../contexts/ToastContext'
 
-export default function Register({ onNavigate }) {
-  const [formData, setFormData] = useState({ email: '', password: '', display_name: '' });
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
+export default function Register() {
+  const navigate = useNavigate()
+  const { token } = useAuth()
+  const { addToast } = useToast()
+  const [displayName, setDisplayName] = useState('')
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [loading, setLoading] = useState(false)
 
   const handleRegister = async (e) => {
-    e.preventDefault();
-    setError('');
-    
+    e.preventDefault()
+    setLoading(true)
+
     try {
-      const response = await fetch('/api/v1/auth/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
-      });
-
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.error || 'Registration failed');
-
-      setSuccess('Account created! You can now log in.');
-      setTimeout(() => onNavigate('login'), 2000);
-    } catch (err) {
-      setError(err.message);
+      await api.post('/auth/register', { display_name: displayName, email, password })
+      addToast('Account created. Log in to continue.', 'success')
+      navigate('/auth/login')
+    } catch (error) {
+      // toast shown by interceptor
+    } finally {
+      setLoading(false)
     }
-  };
+  }
+
+  if (token) {
+    navigate('/search')
+    return null
+  }
 
   return (
-    <div style={{ maxWidth: '400px', margin: '100px auto', fontFamily: 'sans-serif' }}>
-      <h2>Create an Account</h2>
-      {error && <p style={{ color: 'red' }}>{error}</p>}
-      {success && <p style={{ color: '#1DB954' }}>{success}</p>}
-      
-      <form onSubmit={handleRegister} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-        <input 
-          type="text" placeholder="Display Name" required style={{ padding: '10px' }}
-          onChange={(e) => setFormData({...formData, display_name: e.target.value})} 
-        />
-        <input 
-          type="email" placeholder="Email" required style={{ padding: '10px' }}
-          onChange={(e) => setFormData({...formData, email: e.target.value})} 
-        />
-        <input 
-          type="password" placeholder="Password (min 6 chars)" required style={{ padding: '10px' }}
-          onChange={(e) => setFormData({...formData, password: e.target.value})} 
-        />
-        <button type="submit" style={{ padding: '10px', background: '#1DB954', color: 'white', border: 'none', cursor: 'pointer' }}>
-          Register
-        </button>
-      </form>
-      <button onClick={() => onNavigate('login')} style={{ marginTop: '15px', background: 'none', border: 'none', color: 'blue', cursor: 'pointer' }}>
-        Already have an account? Log in
-      </button>
+    <div className="mx-auto flex min-h-[calc(100vh-80px)] max-w-3xl items-center justify-center px-4 py-12">
+      <div className="w-full rounded-3xl border border-white/10 bg-surface p-10 shadow-xl shadow-black/20">
+        <h1 className="text-3xl font-semibold text-white">Create your account</h1>
+        <p className="mt-3 text-sm text-muted">Register and start building playlists.</p>
+        <form onSubmit={handleRegister} className="mt-8 space-y-5">
+          <label className="block text-sm text-white/80">
+            Display Name
+            <input
+              value={displayName}
+              onChange={(e) => setDisplayName(e.target.value)}
+              required
+              className="mt-2 w-full rounded-3xl border border-white/10 bg-[#11131b] px-4 py-3 text-white outline-none transition focus:border-accent"
+              placeholder="Your name"
+            />
+          </label>
+          <label className="block text-sm text-white/80">
+            Email
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              className="mt-2 w-full rounded-3xl border border-white/10 bg-[#11131b] px-4 py-3 text-white outline-none transition focus:border-accent"
+              placeholder="you@example.com"
+            />
+          </label>
+          <label className="block text-sm text-white/80">
+            Password
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              className="mt-2 w-full rounded-3xl border border-white/10 bg-[#11131b] px-4 py-3 text-white outline-none transition focus:border-accent"
+              placeholder="Minimum 6 characters"
+            />
+          </label>
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full rounded-full bg-accent px-5 py-3 text-sm font-semibold text-black transition hover:bg-accent/90 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {loading ? 'Creating account...' : 'Create account'}
+          </button>
+        </form>
+        <p className="mt-6 text-center text-sm text-white/70">
+          Already have an account?{' '}
+          <Link to="/auth/login" className="text-accent hover:underline">
+            Sign in
+          </Link>
+        </p>
+      </div>
     </div>
-  );
+  )
 }

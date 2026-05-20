@@ -1,77 +1,130 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react'
+import api from '../../services/api'
+import { useAuth } from '../../contexts/AuthContext'
+import { useToast } from '../../contexts/ToastContext'
 
-export default function Profile({ token, onLogout }) {
-  const [profile, setProfile] = useState(null);
-  const [isEditing, setIsEditing] = useState(false);
-  const [editName, setEditName] = useState('');
-  const [message, setMessage] = useState('');
+export default function Profile() {
+  const { user, logout, setUser } = useAuth()
+  const { addToast } = useToast()
+  const [profile, setProfile] = useState(user)
+  const [isEditing, setIsEditing] = useState(false)
+  const [displayName, setDisplayName] = useState(user?.display_name || user?.name || '')
+  const [loading, setLoading] = useState(true)
 
-  const fetchProfile = async () => {
-    const res = await fetch('/api/profile/', {
-      headers: { 'Authorization': `Bearer ${token}` }
-    });
-    const data = await res.json();
-    setProfile(data);
-    setEditName(data.display_name || data.DisplayName || '');
-  };
-
-  useEffect(() => { fetchProfile(); }, []);
-
-  const handleUpdate = async () => {
-    const res = await fetch('/api/v1/profile/', {
-      method: 'PUT',
-      headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ display_name: editName, avatar_url: '' })
-    });
-    if (res.ok) {
-      setMessage('Profile updated!');
-      setIsEditing(false);
-      fetchProfile();
+  useEffect(() => {
+    if (!profile) {
+      api.get('/profile/me')
+        .then((response) => {
+          setProfile(response.data)
+          setDisplayName(response.data.display_name || response.data.name || '')
+          setUser(response.data)
+        })
+        .catch(() => addToast('Unable to load profile', 'error'))
+        .finally(() => setLoading(false))
+    } else {
+      setLoading(false)
     }
-  };
+  }, [profile, addToast, setUser])
+
+  const handleSave = async () => {
+    try {
+      await api.put('/profile', { display_name: displayName })
+      setProfile((prev) => ({ ...prev, display_name: displayName }))
+      setUser((prev) => ({ ...prev, display_name: displayName }))
+      setIsEditing(false)
+      addToast('Profile saved', 'success')
+    } catch (error) {
+      // handled globally
+    }
+  }
 
   const handleDelete = async () => {
-    if (!window.confirm("Are you sure? This cannot be undone.")) return;
-    const res = await fetch('/api/v1/profile/', {
-      method: 'DELETE',
-      headers: { 'Authorization': `Bearer ${token}` }
-    });
-    if (res.ok) onLogout();
-  };
+    if (!window.confirm('Delete account? This cannot be undone.')) return
 
-  if (!profile) return <div>Loading...</div>;
+    try {
+      await api.delete('/profile')
+      logout()
+      addToast('Account deleted', 'success')
+    } catch (error) {
+      // handled globally
+    }
+  }
+
+  if (loading) {
+    return (
+      <div className="mx-auto flex min-h-[calc(100vh-80px)] max-w-4xl items-center justify-center px-4 py-12">
+        <div className="rounded-3xl border border-white/10 bg-surface p-8">Loading profile…</div>
+      </div>
+    )
+  }
 
   return (
-    <div style={{ padding: '20px', maxWidth: '600px', margin: '0 auto' }}>
-      <h2>ðŸ‘¤ My Profile</h2>
-      {message && <p style={{ color: '#1DB954' }}>{message}</p>}
-      
-      <div style={{ background: '#282c34', color: 'white', padding: '25px', borderRadius: '12px' }}>
-        {isEditing ? (
-          <div style={{ display: 'flex', gap: '10px', marginBottom: '15px' }}>
-            <input 
-              value={editName} 
-              onChange={(e) => setEditName(e.target.value)} 
-              style={{ padding: '8px' }}
-            />
-            <button onClick={handleUpdate} style={{ background: '#1DB954', border: 'none', padding: '8px 15px', color: 'white', cursor: 'pointer' }}>Save</button>
-            <button onClick={() => setIsEditing(false)} style={{ background: 'grey', border: 'none', padding: '8px 15px', color: 'white', cursor: 'pointer' }}>Cancel</button>
+    <div className="mx-auto max-w-4xl space-y-8 px-4 py-6 sm:px-8">
+      <div className="rounded-3xl border border-white/10 bg-surface p-8 shadow-xl shadow-black/10">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h1 className="text-3xl font-semibold text-white">Your profile</h1>
+            <p className="mt-2 text-sm text-muted">Manage your personal account settings.</p>
           </div>
-        ) : (
-          <div style={{ marginBottom: '15px' }}>
-            <div style={{ fontSize: '24px', fontWeight: 'bold' }}>{profile.display_name || profile.DisplayName}</div>
-            <button onClick={() => setIsEditing(true)} style={{ background: 'none', border: 'none', color: '#1DB954', cursor: 'pointer', padding: '0' }}>Edit Name</button>
+          <button
+            onClick={handleDelete}
+            className="rounded-full bg-red-500 px-5 py-3 text-sm font-semibold text-white transition hover:bg-red-400"
+          >
+            Delete account
+          </button>
+        </div>
+
+        <div className="mt-8 grid gap-6 sm:grid-cols-[1fr_1fr]">
+          <div className="space-y-4">
+            <div>
+              <div className="text-sm uppercase tracking-[0.35em] text-muted">Name</div>
+              {isEditing ? (
+                <input
+                  value={displayName}
+                  onChange={(e) => setDisplayName(e.target.value)}
+                  className="mt-2 w-full rounded-3xl border border-white/10 bg-[#11131b] px-4 py-3 text-white outline-none"
+                />
+              ) : (
+                <p className="mt-2 text-lg text-white">{profile.display_name || profile.name || 'No name set'}</p>
+              )}
+            </div>
+
+            <div>
+              <div className="text-sm uppercase tracking-[0.35em] text-muted">Email</div>
+              <p className="mt-2 text-lg text-white">{profile.email}</p>
+            </div>
+
+            <div>
+              <div className="text-sm uppercase tracking-[0.35em] text-muted">Member since</div>
+              <p className="mt-2 text-lg text-white">{new Date(profile.created_at || profile.createdAt || Date.now()).toLocaleDateString()}</p>
+            </div>
           </div>
-        )}
-        
-        <p><strong>Email:</strong> {profile.email || profile.Email}</p>
-        <p><strong>Role:</strong> {profile.role || profile.Role}</p>
-        <p><strong>ID:</strong> {profile.user_id || profile.UserId}</p>
-        
-        <button onClick={handleDelete} style={{ marginTop: '20px', background: '#ff4d4f', color: 'white', border: 'none', padding: '10px 15px', cursor: 'pointer', borderRadius: '4px' }}>
-          Delete Account
-        </button>
+
+          <div className="space-y-4 rounded-3xl border border-white/10 bg-surface2 p-6">
+            <div className="flex items-center justify-between gap-4">
+              <div>
+                <p className="text-sm uppercase tracking-[0.35em] text-muted">Account ID</p>
+                <p className="mt-2 text-base text-white/80">{profile.id || profile.user_id || profile.userId}</p>
+              </div>
+              <button
+                onClick={() => setIsEditing((prev) => !prev)}
+                className="rounded-full border border-white/10 px-4 py-2 text-sm text-white transition hover:border-accent"
+              >
+                {isEditing ? 'Cancel' : 'Edit'}
+              </button>
+            </div>
+
+            {isEditing && (
+              <button
+                onClick={handleSave}
+                className="w-full rounded-full bg-accent px-5 py-3 text-sm font-semibold text-black transition hover:bg-accent/90"
+              >
+                Save changes
+              </button>
+            )}
+          </div>
+        </div>
       </div>
     </div>
-  );
+  )
 }
