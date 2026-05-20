@@ -6,6 +6,8 @@ import (
 	"log"
 	"strconv"
 
+	"streaming_service/internal/metrics"
+
 	pb "github.com/Adiilkwz/music-grpc-go/streaming"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
@@ -59,6 +61,7 @@ func (h *Handler) StreamAudio(req *pb.StreamRequest, stream pb.StreamingService_
 }
 
 func (h *Handler) RecordPlay(ctx context.Context, req *pb.RecordPlayRequest) (*pb.SuccessResponse, error) {
+	metrics.GRPCRequests.WithLabelValues("RecordPlay").Inc()
 	userID, err := extractUserID(ctx)
 	if err != nil {
 		return nil, err
@@ -68,6 +71,7 @@ func (h *Handler) RecordPlay(ctx context.Context, req *pb.RecordPlayRequest) (*p
 	if err1 != nil {
 		return &pb.SuccessResponse{Success: false}, status.Errorf(codes.Internal, "failed to record play: %v", err1)
 	}
+	metrics.PlaysTotal.Inc()
 	return &pb.SuccessResponse{Success: true}, nil
 }
 

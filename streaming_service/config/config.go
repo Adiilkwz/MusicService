@@ -15,6 +15,12 @@ type Config struct {
 	AudioDir       string
 	NATSUrl        string
 	AuthServiceUrl string
+	RedisAddr      string
+	RedisPassword  string
+	SMTPHost       string
+	SMTPPort       int
+	SMTPUser       string
+	SMTPPassword   string
 }
 
 func Load() *Config {
@@ -28,6 +34,12 @@ func Load() *Config {
 		AudioDir:       getEnv("AUDIO_DIR", "./audio_files"),
 		NATSUrl:        getEnv("NATS_URL", "nats://localhost:4222"),
 		AuthServiceUrl: getEnv("AUTH_SERVICE_URL", "localhost:50051"),
+		RedisAddr:      getEnv("REDIS_ADDR", "localhost:6379"),
+		RedisPassword:  getEnv("REDIS_PASSWORD", ""),
+		SMTPHost:       getEnv("SMTP_HOST", "smtp.gmail.com"),
+		SMTPPort:       getEnvAsInt("SMTP_PORT", 587),
+		SMTPUser:       getEnv("SMTP_USER", ""),
+		SMTPPassword:   getEnv("SMTP_PASSWORD", ""),
 	}
 }
 

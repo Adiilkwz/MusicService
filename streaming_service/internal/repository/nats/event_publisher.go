@@ -14,7 +14,6 @@ type eventPublisher struct {
 	conn *nats.Conn
 }
 
-// NewEventPublisher creates a new NATS event publisher
 func NewEventPublisher(natsURL string) (*eventPublisher, error) {
 	conn, err := nats.Connect(natsURL)
 	if err != nil {
@@ -24,7 +23,6 @@ func NewEventPublisher(natsURL string) (*eventPublisher, error) {
 	return &eventPublisher{conn: conn}, nil
 }
 
-// PublishSongPlayed publishes a SongPlayedEvent to NATS
 func (p *eventPublisher) PublishSongPlayed(ctx context.Context, userID, songID int64) error {
 	event := &events.SongPlayedEvent{
 		EventID:   fmt.Sprintf("%d-%d-%d", userID, songID, time.Now().UnixNano()),
@@ -35,7 +33,6 @@ func (p *eventPublisher) PublishSongPlayed(ctx context.Context, userID, songID i
 
 	data := event.Marshal()
 	
-	// Publish asynchronously with timeout
 	done := make(chan error, 1)
 	go func() {
 		err := p.conn.Publish(event.Subject(), data)
@@ -45,7 +42,6 @@ func (p *eventPublisher) PublishSongPlayed(ctx context.Context, userID, songID i
 		done <- err
 	}()
 
-	// Wait for publish with context timeout
 	select {
 	case err := <-done:
 		return err
@@ -56,7 +52,6 @@ func (p *eventPublisher) PublishSongPlayed(ctx context.Context, userID, songID i
 	}
 }
 
-// Close closes the NATS connection
 func (p *eventPublisher) Close() error {
 	if p.conn != nil {
 		p.conn.Close()
