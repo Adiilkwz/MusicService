@@ -6,6 +6,7 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"log"
 	"time"
 
 	"auth_service/internal/domain"
@@ -16,13 +17,15 @@ import (
 
 type accessUsecase struct {
 	repo        domain.UserRepository
+	publisher   domain.EventPublisher
 	jwtSecret   []byte
 	emailSender domain.EmailSender
 }
 
-func NewAccessUsecase(repo domain.UserRepository, secret string, emailSender domain.EmailSender) domain.AccessUsecase {
+func NewAccessUsecase(repo domain.UserRepository, pub domain.EventPublisher, secret string, emailSender domain.EmailSender) domain.AccessUsecase {
 	return &accessUsecase{
 		repo:        repo,
+		publisher:   pub,
 		jwtSecret:   []byte(secret),
 		emailSender: emailSender,
 	}
@@ -55,9 +58,9 @@ func (u *accessUsecase) Register(ctx context.Context, email, password, displayNa
 	}
 
 	go func() {
-		err := u.emailSender.SendWelcomeEmail(email, displayName)
+		err := u.publisher.PublishUserRegistered(userID, email, displayName)
 		if err != nil {
-			fmt.Printf("Error sending welcome email to %s: %v\n", email, err)
+			log.Printf("Warning: Failed to publish registration event: %v\n", err)
 		}
 	}()
 

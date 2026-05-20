@@ -4,16 +4,19 @@ import (
 	"database/sql"
 	"log"
 	"net"
+	"os"
 
 	"auth_service/internal/config"
 	"auth_service/internal/delivery/grpc"
 	"auth_service/internal/infrastructure/email"
+	nats_infra "auth_service/internal/infrastructure/nats"
 	"auth_service/internal/repository/postgres"
 	"auth_service/internal/usecase"
 
 	"github.com/Adiilkwz/music-grpc-go/auth"
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
+	"github.com/nats-io/nats.go"
 	grpc_lib "google.golang.org/grpc"
 )
 
@@ -35,16 +38,29 @@ func main() {
 	}
 	log.Println("Successfully connected to PostgreSQL!")
 
-	emailSender := email.NewSMTPSender(cfg.SMTPHost, cfg.SMTPPort, cfg.SMTPUser, cfg.SMTPPass)
+	natsURL := os.Getenv("NATS_URL")
+	if natsURL == "" {
+		natsURL = "nats://localhost:4222"
+	}
+	natsConn, err := nats.Connect(natsURL)
+	if err != nil {
+		log.Fatalf("Failed to connect to NATS: %v", err)
+	}
+	defer natsConn.Close()
+	log.Println("Successfully connected to NATS!")
 
+	emailSender := email.NewSMTPSender(cfg.SMTPHost, cfg.SMTPPort, cfg.SMTPUser, cfg.SMTPPass)
 	userRepo := postgres.NewUserRepository(db)
 
-	accessUC := usecase.NewAccessUsecase(userRepo, cfg.JWTSecret, emailSender)
+	eventPublisher := nats_infra.NewNatsPublisher(natsConn)
+
+	nats_infra.StartRegistrationEmailWorker(natsConn, emailSender)
+
+	accessUC := usecase.NewAccessUsecase(userRepo, eventPublisher, cfg.JWTSecret, emailSender)
 	profileUC := usecase.NewProfileUsecase(userRepo)
 	adminUC := usecase.NewAdminUsecase(userRepo)
 
 	authServer := grpc.NewAuthServer(accessUC, profileUC, adminUC)
-
 	grpcServer := grpc_lib.NewServer()
 	auth.RegisterAuthServiceServer(grpcServer, authServer)
 

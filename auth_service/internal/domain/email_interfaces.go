@@ -1,6 +1,10 @@
 package domain
 
 type EmailSender interface {
-	SendWelcomeEmail(toEmail, displayName string) error
-	SendPasswordResetEmail(toEmail, resetCode string) error
+	SendPasswordResetEmail(email, resetCode string) error
+	SendWelcomeEmail(email, displayName string) error
+}
+
+type EventPublisher interface {
+	PublishUserRegistered(userID int64, email, displayName string) error
 }
