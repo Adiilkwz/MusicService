@@ -6,6 +6,7 @@ type ArtistUsecase interface {
 	CreateArtist(ctx context.Context, name, bio string) (int64, error)
 	GetArtist(ctx context.Context, id int64) (*Artist, error)
 	GetAlbumsByArtist(ctx context.Context, artistID int64) ([]Album, error)
+	DeleteArtist(ctx context.Context, id int64) error
 }
 
 type AlbumUsecase interface {
@@ -22,6 +23,14 @@ type SongUsecase interface {
 	GetSongsByGenre(ctx context.Context, genre string, limit int32) ([]Song, error)
 
 	IncrementSongPlays(ctx context.Context, id int64) error
+}
+
+type AnalyticsUsecase interface {
+	GetTopSongs(ctx context.Context, limit int32) ([]Song, error)
+
+	GetNewAlbums(ctx context.Context, days int32) ([]Album, error)
+
+	GetCatalogStats(ctx context.Context) (map[string]int64, error)
 }
 
 type SearchUsecase interface {

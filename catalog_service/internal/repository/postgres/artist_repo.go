@@ -60,3 +60,28 @@ func (r *artistRepo) Search(ctx context.Context, query string, limit int32) ([]d
 
 	return artists, nil
 }
+
+func (r *artistRepo) Delete(ctx context.Context, id int64) error {
+	conn, err := r.db.Acquire(ctx)
+	if err != nil {
+		return err
+	}
+	defer conn.Release()
+
+	tx, err := conn.Begin(ctx)
+	if err != nil {
+		return err
+	}
+
+	_, err = tx.Exec(ctx, `DELETE FROM artists WHERE id = $1`, id)
+	if err != nil {
+		_ = tx.Rollback(ctx)
+		return err
+	}
+
+	if err := tx.Commit(ctx); err != nil {
+		return err
+	}
+
+	return nil
+}

@@ -19,6 +19,10 @@ type Config struct {
 	RedisPassword string
 
 	NatsURL string
+	SMTPHost     string
+	SMTPPort     int
+	SMTPUser     string
+	SMTPPassword string
 }
 
 func Load() *Config {
@@ -34,7 +38,11 @@ func Load() *Config {
 		RedisAddr:     getEnv("REDIS_ADDR", "localhost:6379"),
 		RedisPassword: getEnv("REDIS_PASSWORD", ""),
 
-		NatsURL: getEnv("NATS_URL", "nats://localhost:4222"),
+		NatsURL:      getEnv("NATS_URL", "nats://localhost:4222"),
+		SMTPHost:     getEnv("SMTP_HOST", "smtp.gmail.com"),
+		SMTPPort:     getEnvAsInt("SMTP_PORT", 587),
+		SMTPUser:     getEnv("SMTP_USER", ""),
+		SMTPPassword: getEnv("SMTP_PASSWORD", ""),
 	}
 }
 

@@ -6,6 +6,7 @@ type ArtistRepository interface {
 	Create(ctx context.Context, artist *Artist) (int64, error)
 	GetByID(ctx context.Context, id int64) (*Artist, error)
 	Search(ctx context.Context, query string, limit int32) ([]Artist, error)
+	Delete(ctx context.Context, id int64) error
 }
 
 type AlbumRepository interface {
@@ -13,6 +14,8 @@ type AlbumRepository interface {
 	GetByID(ctx context.Context, id int64) (*Album, error)
 	GetByArtistID(ctx context.Context, artistID int64) ([]Album, error)
 	Search(ctx context.Context, query string, limit int32) ([]Album, error)
+	DeleteByArtistID(ctx context.Context, artistID int64) error
+	Delete(ctx context.Context, id int64) error
 }
 
 type SongRepository interface {
