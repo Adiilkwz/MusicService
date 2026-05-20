@@ -24,7 +24,13 @@ export default function Login() {
 
     try {
       const response = await api.post('/auth/login', { email, password })
-      login(response.data.token, response.data.user)
+      const accessToken = response.data.access_token
+      if (!accessToken) {
+        throw new Error('No access token in login response')
+      }
+      api.setToken(accessToken)
+      const profileResponse = await api.get('/profile/me')
+      login(accessToken, profileResponse.data)
       addToast('Welcome back!', 'success')
       navigate('/search')
     } catch (error) {

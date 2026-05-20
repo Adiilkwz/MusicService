@@ -11,6 +11,7 @@ service StreamingService {
 
   rpc CreatePlaylist (CreatePlaylistRequest) returns (CreatePlaylistResponse);
   rpc GetPlaylist (GetPlaylistRequest) returns (GetPlaylistResponse);
+  rpc GetUserPlaylists (GetUserPlaylistsRequest) returns (GetUserPlaylistsResponse);
   rpc AddSongToPlaylist (ModifyPlaylistRequest) returns (SuccessResponse);
   rpc RemoveSongFromPlaylist (ModifyPlaylistRequest) returns (SuccessResponse);
   rpc DeletePlaylist (DeletePlaylistRequest) returns (SuccessResponse);
@@ -78,6 +79,23 @@ message GetPlaylistResponse {
   int64 playlist_id = 1; 
   string title = 2; 
   repeated int64 song_ids = 3; 
+}
+
+message PlaylistItem {
+  int64 id = 1;
+  string title = 2;
+  int32 song_count = 3;
+  string created_at = 4;
+}
+
+message GetUserPlaylistsRequest {
+  int32 limit = 1;
+  int32 offset = 2;
+}
+
+message GetUserPlaylistsResponse {
+  repeated PlaylistItem playlists = 1;
+  int32 total = 2;
 }
 
 message ModifyPlaylistRequest { 

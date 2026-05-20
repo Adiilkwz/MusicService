@@ -5,10 +5,11 @@ export default defineConfig({
   plugins: [react()],
   server: {
     proxy: {
+      // Все /api маршруты проксируются на API Gateway
       '/api': {
         target: 'http://localhost:8080',
         changeOrigin: true,
-      }
+      },
     }
   }
 })

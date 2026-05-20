@@ -47,6 +47,7 @@ services:
       - REDIS_ADDR=redis-cache:6379
     ports:
       - "50051:50051"
+      - "8082:8082"
     depends_on:
       postgres-db:
         condition: service_healthy
@@ -69,17 +70,35 @@ services:
       - DB_NAME=streaming_db
       - NATS_URL=nats://nats-broker:4222
       - AUTH_SERVICE_URL=auth-service:50051
+      - REDIS_ADDR=redis-cache:6379
     ports:
       - "50052:50052"
+      - "8081:8081"
     volumes:
       - ./streaming_service/audio_files:/app/audio_files
     depends_on:
       postgres-db:
         condition: service_healthy
+      redis-cache:
+        condition: service_started
       nats-broker:
         condition: service_started
       auth-service:
         condition: service_started
+    networks:
+      - music-net
+
+  api-gateway:
+    build:
+      context: ./api_gateway
+      dockerfile: Dockerfile
+    container_name: api-gateway
+    ports:
+      - "8080:8080"
+    depends_on:
+      - auth-service
+      - catalog-service
+      - streaming-service
     networks:
       - music-net
 
@@ -97,6 +116,7 @@ services:
       - NATS_URL=nats://nats-broker:4222
     ports:
       - "50053:50053"
+      - "8083:8080"
     depends_on:
       postgres-db:
         condition: service_healthy

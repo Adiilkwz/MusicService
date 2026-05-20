@@ -4,7 +4,13 @@ import api from '../services/api'
 const AuthContext = createContext(null)
 
 export function AuthProvider({ children }) {
-  const [token, setToken] = useState(() => localStorage.getItem('jwt_token'))
+  const [token, setToken] = useState(() => {
+    const saved = localStorage.getItem('jwt_token')
+    if (saved) {
+      api.setToken(saved)
+    }
+    return saved
+  })
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
 

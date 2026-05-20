@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"os"
 
 	"github.com/gin-gonic/gin"
 	"google.golang.org/grpc"
@@ -18,21 +19,37 @@ import (
 func main() {
 	log.Println("Initializing API Gateway...")
 
-	authConn, err := grpc.NewClient("localhost:50051", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	// Use Docker container names for internal communication
+	authAddr := "auth-service:50051"
+	streamingAddr := "streaming-service:50052"
+	catalogAddr := "catalog-service:50053"
+
+	// Allow override via environment variables for local testing
+	if os.Getenv("AUTH_SERVICE_URL") != "" {
+		authAddr = os.Getenv("AUTH_SERVICE_URL")
+	}
+	if os.Getenv("STREAMING_SERVICE_URL") != "" {
+		streamingAddr = os.Getenv("STREAMING_SERVICE_URL")
+	}
+	if os.Getenv("CATALOG_SERVICE_URL") != "" {
+		catalogAddr = os.Getenv("CATALOG_SERVICE_URL")
+	}
+
+	authConn, err := grpc.NewClient(authAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		log.Fatalf("Auth Service Error: %v", err)
 	}
 	defer authConn.Close()
 	authClient := auth.NewAuthServiceClient(authConn)
 
-	streamingConn, err := grpc.NewClient("localhost:50052", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	streamingConn, err := grpc.NewClient(streamingAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		log.Fatalf("Streaming Service Error: %v", err)
 	}
 	defer streamingConn.Close()
 	streamingClient := streaming.NewStreamingServiceClient(streamingConn)
 
-	catalogConn, err := grpc.NewClient("localhost:50053", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	catalogConn, err := grpc.NewClient(catalogAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		log.Fatalf("Catalog Service Error: %v", err)
 	}

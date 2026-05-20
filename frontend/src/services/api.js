@@ -6,7 +6,9 @@ const api = axios.create({
   withCredentials: true,
 })
 
-let currentToken = null
+const TOKEN_KEY = 'jwt_token'
+
+let currentToken = localStorage.getItem(TOKEN_KEY) || null
 let onUnauthorized = () => {}
 let onLoading = () => {}
 let onToast = () => {}
@@ -34,7 +36,11 @@ api.interceptors.response.use(
     onLoading(false)
     const status = error.response?.status
     if (status === 401) {
-      onUnauthorized()
+      const url = error.config?.url || ''
+      const isPublicAuth = url.includes('/auth/login') || url.includes('/auth/register')
+      if (!isPublicAuth) {
+        onUnauthorized()
+      }
     }
     const message = error.response?.data?.message || error.message || 'Request failed'
     onToast(message, 'error')

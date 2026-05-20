@@ -35,6 +35,7 @@ type RecordPlayInput struct {
 func RegisterStreamRoutes(rg *gin.RouterGroup, streamClient streaming.StreamingServiceClient, catalogClient catalog.CatalogServiceClient) {
 	playlistGroup := rg.Group("/playlists")
 	{
+		playlistGroup.GET("/", getUserPlaylistsHandler(streamClient))
 		playlistGroup.POST("/", createPlaylistHandler(streamClient))
 		playlistGroup.GET("/:id", getPlaylistHandler(streamClient))
 		playlistGroup.POST("/:id/songs", addSongToPlaylistHandler(streamClient))
@@ -55,6 +56,16 @@ func RegisterStreamRoutes(rg *gin.RouterGroup, streamClient streaming.StreamingS
 		audioGroup.POST("/history", recordPlayHandler(streamClient))
 		audioGroup.GET("/history", getUserHistoryHandler(streamClient))
 		audioGroup.GET("/trending", getTrendingHandler(streamClient))
+	}
+}
+
+func getUserPlaylistsHandler(client streaming.StreamingServiceClient) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		// TODO: Implement GetUserPlaylists in streaming service
+		// For now, return empty list to prevent 404 errors
+		c.JSON(http.StatusOK, gin.H{
+			"playlists": []interface{}{},
+		})
 	}
 }
 

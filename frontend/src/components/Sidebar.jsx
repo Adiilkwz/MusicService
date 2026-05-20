@@ -11,15 +11,19 @@ const navItems = [
 ]
 
 export default function Sidebar() {
-  const { user } = useAuth()
+  const { user, token } = useAuth()
   const location = useLocation()
   const [playlists, setPlaylists] = useState([])
 
   useEffect(() => {
+    if (!token) {
+      setPlaylists([])
+      return
+    }
     api.get('/playlists')
       .then((response) => setPlaylists(response.data || []))
       .catch(() => setPlaylists([]))
-  }, [location.pathname])
+  }, [token, location.pathname])
 
   return (
     <aside className="w-72 min-h-screen border-r border-surface/60 bg-surface p-6 hidden sm:flex sm:flex-col">

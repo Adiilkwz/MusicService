@@ -39,6 +39,7 @@ func RegisterPublicAuthRoutes(rg *gin.RouterGroup, client auth.AuthServiceClient
 func RegisterProtectedAuthRoutes(rg *gin.RouterGroup, client auth.AuthServiceClient) {
 	profileGroup := rg.Group("/profile")
 	{
+		profileGroup.GET("/me", getProfileHandler(client))
 		profileGroup.GET("/", getProfileHandler(client))
 		profileGroup.PUT("/", updateProfileHandler(client))
 		profileGroup.DELETE("/", deleteAccountHandler(client))
