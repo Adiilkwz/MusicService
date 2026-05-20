@@ -82,12 +82,24 @@ func (r *userRepo) SetResetCode(ctx context.Context, email, code string) error {
 }
 
 func (r *userRepo) Delete(ctx context.Context, id int64) error {
+	tx, err := r.db.BeginTx(ctx, nil)
+	if err != nil {
+		return fmt.Errorf("failed to begin transaction: %w", err)
+	}
+
+	defer tx.Rollback()
+
 	query := `DELETE FROM users WHERE id = $1`
 
-	_, err := r.db.ExecContext(ctx, query, id)
+	_, err = tx.ExecContext(ctx, query, id)
 	if err != nil {
 		return fmt.Errorf("repository.Delete: %w", err)
 	}
+
+	if err := tx.Commit(); err != nil {
+		return fmt.Errorf("failed to commit transaction: %w", err)
+	}
+
 	return nil
 }
 

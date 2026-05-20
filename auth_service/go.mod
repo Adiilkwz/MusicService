@@ -12,6 +12,11 @@ require (
 require github.com/joho/godotenv v1.5.1
 
 require (
+	github.com/cespare/xxhash/v2 v2.3.0 // indirect
+	go.uber.org/atomic v1.11.0 // indirect
+)
+
+require (
 	github.com/klauspost/compress v1.18.5 // indirect
 	github.com/nats-io/nats.go v1.52.0
 	github.com/nats-io/nkeys v0.4.15 // indirect
@@ -19,6 +24,7 @@ require (
 )
 
 require (
+	github.com/redis/go-redis/v9 v9.19.0
 	golang.org/x/net v0.52.0 // indirect
 	golang.org/x/sys v0.43.0 // indirect
 	golang.org/x/text v0.36.0 // indirect

@@ -11,3 +11,9 @@ type UserRepository interface {
 	GetByEmail(ctx context.Context, email string) (*User, error)
 	List(ctx context.Context, limit, offset int) ([]*User, error)
 }
+
+type UserCache interface {
+	SetUser(ctx context.Context, user *User) error
+	GetUser(ctx context.Context, id int64) (*User, error)
+	DeleteUser(ctx context.Context, id int64) error
+}
