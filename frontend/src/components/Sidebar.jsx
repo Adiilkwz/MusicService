@@ -4,10 +4,10 @@ import api from '../services/api'
 import { useAuth } from '../contexts/AuthContext'
 
 const navItems = [
-  { label: 'Search', to: '/search' },
-  { label: 'Favorites', to: '/likes' },
-  { label: 'Playlists', to: '/playlists' },
-  { label: 'Profile', to: '/profile' },
+  { label: 'Search', to: '/search', icon: '🔍' },
+  { label: 'Favorites', to: '/likes', icon: '❤️' },
+  { label: 'Playlists', to: '/playlists', icon: '🎧' },
+  { label: 'Profile', to: '/profile', icon: '👤' },
 ]
 
 export default function Sidebar() {
@@ -22,51 +22,31 @@ export default function Sidebar() {
   }, [location.pathname])
 
   return (
-    <aside className="w-72 min-h-screen border-r border-surface/60 bg-surface p-5 hidden sm:block">
-      <div className="mb-8">
-        <div className="text-sm uppercase tracking-[0.3em] text-muted">MusicHub</div>
-        <h1 className="mt-4 text-2xl font-semibold">Stream Studio</h1>
+    <aside className="w-72 min-h-screen border-r border-surface/60 bg-surface p-6 hidden sm:flex sm:flex-col">
+      <div className="mb-10">
+        <div className="text-xs uppercase tracking-[0.35em] text-muted">MusicHub</div>
+        <h1 className="mt-4 text-3xl font-semibold tracking-tight text-white">Stream Studio</h1>
       </div>
 
-      <nav className="space-y-1">
+      <nav className="space-y-2">
         {navItems.map((item) => (
           <NavLink
             key={item.to}
             to={item.to}
             className={({ isActive }) =>
-              `block rounded-2xl px-4 py-3 text-sm font-medium transition ${
-                isActive ? 'bg-accent text-black' : 'text-white/80 hover:bg-white/5'
+              `flex items-center gap-3 rounded-3xl px-4 py-3 text-sm font-medium transition ${
+                isActive ? 'bg-accent text-black shadow-lg' : 'text-white/80 hover:bg-white/5'
               }`
             }
           >
-            {item.label}
+            <span className="text-base">{item.icon}</span>
+            <span>{item.label}</span>
           </NavLink>
         ))}
       </nav>
 
-      <div className="mt-8 pb-10 border-b border-surface2" />
-
-      <div>
-        <div className="text-xs uppercase tracking-[0.3em] text-muted mb-3">Your playlists</div>
-        <div className="space-y-2">
-          {playlists.length === 0 ? (
-            <div className="text-sm text-muted">No playlists yet</div>
-          ) : (
-            playlists.map((playlist) => (
-              <NavLink
-                key={playlist.id}
-                to={`/playlist/${playlist.id}`}
-                className="block rounded-2xl px-4 py-3 text-sm text-white/80 hover:bg-white/5"
-              >
-                {playlist.title}
-              </NavLink>
-            ))
-          )}
-        </div>
-      </div>
-
-      <div className="mt-auto pt-8 text-sm text-muted">
-        {user ? `Logged as ${user.name}` : 'Login to unlock playlists'}
+      <div className="mt-auto rounded-3xl border border-white/10 bg-[#0f111d] p-4 text-sm text-white/70">
+        {user ? `Logged in as ${user.name || user.display_name || 'User'}` : 'Login to unlock playlists and save favorites'}
       </div>
     </aside>
   )

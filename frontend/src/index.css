@@ -1,3 +1,7 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 :root {
   --text: #6b6375;
   --text-h: #08060d;
@@ -52,18 +56,55 @@
 
 body {
   margin: 0;
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--text);
 }
 
 #root {
-  width: 1126px;
+  min-height: 100vh;
+  width: 100%;
   max-width: 100%;
-  margin: 0 auto;
-  text-align: center;
-  border-inline: 1px solid var(--border);
-  min-height: 100svh;
-  display: flex;
-  flex-direction: column;
-  box-sizing: border-box;
+}
+
+.bg-bg {
+  background-color: #090b12;
+}
+
+.bg-surface {
+  background-color: rgba(15, 17, 26, 0.96);
+}
+
+.bg-surface2 {
+  background-color: rgba(20, 24, 38, 0.98);
+}
+
+.text-muted {
+  color: rgba(255, 255, 255, 0.65);
+}
+
+.bg-accent {
+  background-color: #1db954;
+}
+
+.bg-accent/90 {
+  background-color: rgba(29, 185, 84, 0.9);
+}
+
+.text-accent {
+  color: #1db954;
+}
+
+.border-surface {
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.border-surface2 {
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+.shadow-glow {
+  box-shadow: 0 18px 60px -30px rgba(0, 0, 0, 0.8);
 }
 
 h1,

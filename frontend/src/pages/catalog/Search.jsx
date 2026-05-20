@@ -29,16 +29,16 @@ export default function Search() {
 
   return (
     <div className="space-y-8">
-      <div className="rounded-3xl border border-white/10 bg-surface p-8 shadow-glow">
-        <h1 className="text-3xl font-semibold text-white">Search the catalog</h1>
-        <p className="mt-2 text-sm text-muted">Find artists, albums, and songs across the music library.</p>
+      <div className="mx-auto max-w-4xl rounded-3xl border border-white/10 bg-surface p-10 shadow-glow">
+        <h1 className="text-4xl font-semibold text-white">Search the catalog</h1>
+        <p className="mt-3 text-base text-muted">Find artists, albums, and songs across the music library.</p>
 
-        <div className="mt-8">
+        <div className="mt-10">
           <input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search for artist, album, or song"
-            className="w-full rounded-3xl border border-white/10 bg-[#11131b] px-5 py-4 text-white outline-none focus:border-accent"
+            className="w-full rounded-[2rem] border border-white/10 bg-[#11131b] px-6 py-5 text-lg text-white outline-none transition focus:border-accent focus:ring-2 focus:ring-accent/40"
           />
         </div>
       </div>
