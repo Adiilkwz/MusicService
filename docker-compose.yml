@@ -45,11 +45,17 @@ services:
       - ./auth_service/.env
     environment:
       - DATABASE_URL=postgres://postgres:3107@postgres-db:5432/auth_db?sslmode=disable
+      - NATS_URL=nats://nats-broker:4222
+      - REDIS_ADDR=redis-cache:6379
     ports:
       - "50051:50051"
     depends_on:
       postgres-db:
         condition: service_healthy
+      redis-cache:
+        condition: service_started
+      nats-broker:
+        condition: service_started
     networks:
       - music-net
 
