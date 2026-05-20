@@ -18,7 +18,7 @@ export default function Profile({ token, onLogout }) {
   useEffect(() => { fetchProfile(); }, []);
 
   const handleUpdate = async () => {
-    const res = await fetch('/api/v1/profile/', {
+    const res = await fetch('/api/profile/', {
       method: 'PUT',
       headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({ display_name: editName, avatar_url: '' })
@@ -32,7 +32,7 @@ export default function Profile({ token, onLogout }) {
 
   const handleDelete = async () => {
     if (!window.confirm("Are you sure? This cannot be undone.")) return;
-    const res = await fetch('/api/v1/profile/', {
+    const res = await fetch('/api/profile/', {
       method: 'DELETE',
       headers: { 'Authorization': `Bearer ${token}` }
     });

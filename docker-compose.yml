@@ -109,6 +109,30 @@ services:
     networks:
       - music-net
 
+  api-gateway:
+    build:
+      context: ./api_gateway
+      dockerfile: Dockerfile
+    container_name: api-gateway
+    env_file:
+      - ./api_gateway/.env
+    environment:
+      - AUTH_SERVICE_URL=auth-service:50051
+      - STREAMING_SERVICE_URL=streaming-service:50052
+      - CATALOG_SERVICE_URL=catalog-service:50053
+      - PORT=8080
+    ports:
+      - "8080:8080"
+    depends_on:
+      auth-service:
+        condition: service_started
+      streaming-service:
+        condition: service_started
+      catalog-service:
+        condition: service_started
+    networks:
+      - music-net
+
 volumes:
   pgdata:
 

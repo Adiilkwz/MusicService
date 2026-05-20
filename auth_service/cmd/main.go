@@ -54,8 +54,13 @@ func main() {
 	defer natsConn.Close()
 	log.Println("Successfully connected to NATS!")
 
+	redisAddr := os.Getenv("REDIS_ADDR")
+	if redisAddr == "" {
+		redisAddr = "localhost:6379"
+	}
+
 	redisClient := redis_client.NewClient(&redis_client.Options{
-		Addr: "redis:6379",
+		Addr: redisAddr,
 	})
 	if err := redisClient.Ping(context.Background()).Err(); err != nil {
 		log.Fatalf("Redis is unreachable: %v", err)
