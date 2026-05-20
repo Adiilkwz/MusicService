@@ -32,3 +32,7 @@ func (u *artistUsecase) GetArtist(ctx context.Context, id int64) (*domain.Artist
 func (u *artistUsecase) GetAlbumsByArtist(ctx context.Context, artistID int64) ([]domain.Album, error) {
 	return u.albumRepo.GetByArtistID(ctx, artistID)
 }
+
+func (u *artistUsecase) DeleteArtist(ctx context.Context, id int64) error {
+	return u.artistRepo.Delete(ctx, id)
+}

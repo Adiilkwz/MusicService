@@ -1,8 +1,9 @@
 package postgres
 
 import (
-	"context"
 	"catalog_service/internal/domain"
+	"context"
+
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -64,4 +65,14 @@ func (r *albumRepo) Search(ctx context.Context, query string, limit int32) ([]do
 		albums = append(albums, a)
 	}
 	return albums, nil
+}
+
+func (r *albumRepo) DeleteByArtistID(ctx context.Context, artistID int64) error {
+	_, err := r.db.Exec(ctx, `DELETE FROM albums WHERE artist_id = $1`, artistID)
+	return err
+}
+
+func (r *albumRepo) Delete(ctx context.Context, id int64) error {
+	_, err := r.db.Exec(ctx, `DELETE FROM albums WHERE id = $1`, id)
+	return err
 }

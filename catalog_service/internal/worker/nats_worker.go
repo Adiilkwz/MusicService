@@ -27,7 +27,7 @@ func NewNatsWorker(nc *nats.Conn, sUC domain.SongUsecase) *NatsWorker {
 }
 
 func (w *NatsWorker) Start(ctx context.Context) {
-	_, err := w.nc.Subscribe("songs.played", func(m *nats.Msg) {
+	sub, err := w.nc.Subscribe("songs.played", func(m *nats.Msg) {
 		var event SongPlayedEvent
 		if err := json.Unmarshal(m.Data, &event); err != nil {
 			log.Printf("NATS: ошибка парсинга сообщения: %v", err)
@@ -36,14 +36,24 @@ func (w *NatsWorker) Start(ctx context.Context) {
 
 		log.Printf("NATS: получено событие прослушивания песни ID: %d", event.SongID)
 
-		err := w.songUseCase.IncrementSongPlays(ctx, event.SongID)
-		if err != nil {
-			log.Printf("NATS: не удалось обновить счетчик для песни %d: %v", event.SongID, err)
-		}
+		go func(songID int64) {
+			if err := w.songUseCase.IncrementSongPlays(ctx, songID); err != nil {
+				log.Printf("NATS: не удалось обновить счетчик для песни %d: %v", songID, err)
+			}
+		}(event.SongID)
 	})
 	if err != nil {
 		log.Fatalf("NATS: ошибка подписки: %v", err)
 	}
 
-	log.Println("NATS: воркер успешно запущен и слушает топик 'song.played'")
+	log.Println("NATS: воркер успешно запущен и слушает топик 'songs.played'")
+
+	go func() {
+		<-ctx.Done()
+		if err := sub.Unsubscribe(); err != nil {
+			log.Printf("NATS: ошибка при отписке: %v", err)
+		} else {
+			log.Println("NATS: отписан и завершаю работу воркера")
+		}
+	}()
 }
