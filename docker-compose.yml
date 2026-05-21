@@ -9,7 +9,7 @@ services:
       - "5435:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
-      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./docker/postgres:/docker-entrypoint-initdb.d
     networks:
       - music-net
     healthcheck:
@@ -93,6 +93,10 @@ services:
       context: ./api_gateway
       dockerfile: Dockerfile
     container_name: api-gateway
+    environment:
+      - AUTH_SERVICE_URL=auth-service:50051
+      - STREAMING_SERVICE_URL=streaming-service:50052
+      - CATALOG_SERVICE_URL=catalog-service:50053
     ports:
       - "8080:8080"
     depends_on:

@@ -1,3 +1,5 @@
+\c streaming_db
+
 CREATE TABLE IF NOT EXISTS play_history (
     id BIGSERIAL PRIMARY KEY,
     user_id BIGINT NOT NULL,

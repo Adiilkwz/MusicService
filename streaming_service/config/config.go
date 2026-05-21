@@ -33,7 +33,7 @@ func Load() *Config {
 		DBName:         getEnv("DB_NAME", "music_service"),
 		AudioDir:       getEnv("AUDIO_DIR", "./audio_files"),
 		NATSUrl:        getEnv("NATS_URL", "nats://localhost:4222"),
-		AuthServiceUrl: getEnv("AUTH_SERVICE_URL", "localhost:50051"),
+		AuthServiceUrl: getEnv("AUTH_SERVICE_URL", "auth-service:50051"),
 		RedisAddr:      getEnv("REDIS_ADDR", "localhost:6379"),
 		RedisPassword:  getEnv("REDIS_PASSWORD", ""),
 		SMTPHost:       getEnv("SMTP_HOST", "smtp.gmail.com"),

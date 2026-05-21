@@ -14,6 +14,7 @@ FROM alpine:latest
 WORKDIR /app
 
 COPY --from=builder /app/auth-app .
+COPY --from=builder /app/migrations ./migrations
 
 EXPOSE 50051
 

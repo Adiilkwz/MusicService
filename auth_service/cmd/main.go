@@ -9,6 +9,7 @@ import (
   "time"
 
   "auth_service/internal/config"
+  "auth_service/internal/database"
   "auth_service/internal/delivery/grpc"
   "auth_service/internal/infrastructure/email"
   nats_infra "auth_service/internal/infrastructure/nats"
@@ -42,6 +43,11 @@ func main() {
     log.Fatalf("Database is unreachable: %v", err)
   }
   log.Println("Successfully connected to PostgreSQL!")
+
+  if err := database.ApplySQLFile(db, "migrations/create_users_table.up.sql"); err != nil {
+    log.Fatalf("Failed to apply database migrations: %v", err)
+  }
+  log.Println("Database migrations applied successfully")
 
   natsURL := os.Getenv("NATS_URL")
   if natsURL == "" {

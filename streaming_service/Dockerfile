@@ -14,6 +14,7 @@ FROM alpine:latest
 WORKDIR /app
 
 COPY --from=builder /app/streaming-app .
+COPY --from=builder /app/migrations ./migrations
 
 RUN mkdir -p /app/audio_files
 

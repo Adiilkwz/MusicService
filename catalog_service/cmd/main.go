@@ -9,6 +9,7 @@ import (
 	"syscall"
 
 	"catalog_service/config"
+	"catalog_service/internal/database"
 	delivery_grpc "catalog_service/internal/delivery/grpc"
 	gwhttp "catalog_service/internal/delivery/http"
 	"catalog_service/internal/repository/postgres"
@@ -57,6 +58,11 @@ func main() {
 		sugar.Fatalf("База данных недоступна: %v", err)
 	}
 	sugar.Info("Успешное подключение к PostgreSQL")
+
+	if err := database.ApplySQLFile(ctx, dbPool, "migrations/create_catalog_tables.up.sql"); err != nil {
+		sugar.Fatalf("Failed to apply database migrations: %v", err)
+	}
+	sugar.Info("Database migrations applied successfully")
 
 	redisClient := redis.NewClient(&redis.Options{
 		Addr:     cfg.RedisAddr,

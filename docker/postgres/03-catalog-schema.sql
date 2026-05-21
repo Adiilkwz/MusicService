@@ -1,3 +1,5 @@
+\c catalog_db
+
 CREATE TABLE IF NOT EXISTS artists (
     id BIGSERIAL PRIMARY KEY,
     name VARCHAR(255) NOT NULL,

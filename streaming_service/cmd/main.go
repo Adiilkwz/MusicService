@@ -14,6 +14,7 @@ import (
 	"google.golang.org/grpc"
 
 	"streaming_service/config"
+	"streaming_service/internal/database"
 	grpc_delivery "streaming_service/internal/delivery/grpc"
 	gwhttp "streaming_service/internal/delivery/http"
 	"streaming_service/internal/domain"
@@ -40,6 +41,11 @@ func main() {
 		sugar.Fatalf("Failed to connect to database: %v", err)
 	}
 	defer db.Close()
+
+	if err := database.ApplySQLFile(db.DB, "migrations/create_history_tables.up.sql"); err != nil {
+		sugar.Fatalf("Failed to apply database migrations: %v", err)
+	}
+	sugar.Info("Database migrations applied successfully")
 
 	var cacheRepoDomain interface{}
 	var redisClient *redis.Client
@@ -92,7 +98,7 @@ func main() {
 	handler := grpc_delivery.NewHandler(streamingUsecase, playlistUsecase, likeUsecase)
 
 	go func() {
-		gw, err := gwhttp.NewGateway("localhost:" + cfg.ServerPort)
+		gw, err := gwhttp.NewGateway("127.0.0.1:" + cfg.ServerPort)
 		if err != nil {
 			sugar.Errorf("failed to create gateway: %v", err)
 			return
