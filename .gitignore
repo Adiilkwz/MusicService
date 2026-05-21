@@ -1,3 +1,4 @@
 auth_service/.env
 streaming_service/.env
 catalog_service/.env
+api_gateway/.env
