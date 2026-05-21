@@ -5,7 +5,7 @@ export default function Admin({ token }) {
   const [error, setError] = useState('');
 
   const fetchUsers = async () => {
-    const res = await fetch('/api/v1/admin/users/?limit=50', {
+    const res = await fetch('/api/admin/users/?limit=50', {
       headers: { 'Authorization': `Bearer ${token}` }
     });
     const data = await res.json();
@@ -19,7 +19,7 @@ export default function Admin({ token }) {
   useEffect(() => { fetchUsers(); }, []);
 
   const handleRoleChange = async (userId, newRole) => {
-    const res = await fetch(`/api/v1/admin/users/${userId}/role`, {
+    const res = await fetch(`/api/admin/users/${userId}/role`, {
       method: 'PUT',
       headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({ new_role: newRole })
