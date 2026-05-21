@@ -31,8 +31,8 @@ func (s *smtpSender) SendWelcomeEmail(toEmail, displayName string) error {
 }
 
 func (s *smtpSender) SendPasswordResetEmail(toEmail, resetCode string) error {
-	subject := "Passworkd Reset"
-	body := fmt.Sprintf("Your code to reser password: %s\n\nIf you did not request for password reset, ignore this message.", resetCode)
+	subject := "Password Reset"
+	body := fmt.Sprintf("Your code to reset password: %s\n\nIf you did not request for password reset, ignore this message.", resetCode)
 
 	return s.sendMail(toEmail, subject, body)
 }

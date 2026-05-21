@@ -2,7 +2,6 @@ package grpc
 
 import (
 	"context"
-	"fmt"
 	"strconv"
 
 	"github.com/Adiilkwz/music-grpc-go/auth"
@@ -14,20 +13,18 @@ import (
 func extractUserID(ctx context.Context) (int64, error) {
 	md, ok := metadata.FromIncomingContext(ctx)
 
-	fmt.Printf("[MICROSERVICE] Incoming Request Metadata: %v\n", md)
-
 	if !ok {
-		return 0, status.Error(codes.Unauthenticated, "Metadate is not found")
+		return 0, status.Error(codes.Unauthenticated, "metadata is not found")
 	}
 
 	userIDs := md.Get("user_id")
 	if len(userIDs) == 0 {
-		return 0, status.Error(codes.Unauthenticated, "user_id missed on token/metadate")
+		return 0, status.Error(codes.Unauthenticated, "user_id is missing in metadata")
 	}
 
 	userID, err := strconv.ParseInt(userIDs[0], 10, 64)
 	if err != nil {
-		return 0, status.Error(codes.InvalidArgument, "incorrect format of user_id")
+		return 0, status.Error(codes.InvalidArgument, "invalid user_id format in metadata")
 	}
 
 	return userID, nil
