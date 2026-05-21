@@ -1,6 +1,9 @@
 package postgres
 
 import (
+	"fmt"
+	"strconv"
+
 	"streaming_service/internal/domain"
 )
 
@@ -13,7 +16,7 @@ func NewAudioRepository(audioDir string) domain.AudioRepository {
 }
 
 func (r *audioRepo) GetAudioPath(songID int64) string {
-	return r.audioDir + "/song_" + string(rune(songID)) + ".mp3"
+	return fmt.Sprintf("%s/song_%s.mp3", r.audioDir, strconv.FormatInt(songID, 10))
 }
 
 func (r *audioRepo) ReadChunk(songID int64, offset, size int64) ([]byte, error) {
