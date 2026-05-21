@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"net"
 	"net/http"
 	"os"
@@ -11,6 +12,8 @@ import (
 	"catalog_service/config"
 	delivery_grpc "catalog_service/internal/delivery/grpc"
 	gwhttp "catalog_service/internal/delivery/http"
+	"catalog_service/internal/infrastructure"
+	email "catalog_service/internal/infrastructure/email"
 	"catalog_service/internal/repository/postgres"
 	redis_repo "catalog_service/internal/repository/redis"
 	"catalog_service/internal/usecase"
@@ -58,6 +61,12 @@ func main() {
 	}
 	sugar.Info("Успешное подключение к PostgreSQL")
 
+	smtpPort := cfg.SMTPPort
+	if err := infrastructure.RunMigrations(ctx, dbPool, "./migrations"); err != nil {
+		sugar.Fatalf("Ошибка при запуске миграций: %v", err)
+	}
+	sugar.Info("Миграции успешно применены")
+
 	redisClient := redis.NewClient(&redis.Options{
 		Addr:     cfg.RedisAddr,
 		Password: cfg.RedisPassword,
@@ -69,6 +78,9 @@ func main() {
 		sugar.Fatalf("Redis недоступен: %v", err)
 	}
 	sugar.Info("Успешное подключение к Redis")
+
+	emailSender := email.NewSMTPSender(cfg.SMTPHost, fmt.Sprintf("%d", smtpPort), cfg.SMTPUser, cfg.SMTPPassword)
+	_ = emailSender
 
 	artistRepo := postgres.NewArtistRepository(dbPool)
 	albumRepo := postgres.NewAlbumRepository(dbPool)

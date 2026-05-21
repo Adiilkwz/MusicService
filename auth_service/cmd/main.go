@@ -10,6 +10,7 @@ import (
 
 	"auth_service/internal/config"
 	"auth_service/internal/delivery/grpc"
+	"auth_service/internal/infrastructure"
 	"auth_service/internal/infrastructure/email"
 	nats_infra "auth_service/internal/infrastructure/nats"
 	"auth_service/internal/repository/postgres"
@@ -42,6 +43,11 @@ func main() {
 		log.Fatalf("Database is unreachable: %v", err)
 	}
 	log.Println("Successfully connected to PostgreSQL!")
+
+	if err := infrastructure.RunMigrations(db, "./migrations"); err != nil {
+		log.Fatalf("Failed to run migrations: %v", err)
+	}
+	log.Println("Migrations applied successfully")
 
 	natsURL := os.Getenv("NATS_URL")
 	if natsURL == "" {

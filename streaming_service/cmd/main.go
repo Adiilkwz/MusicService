@@ -9,6 +9,8 @@ import (
 
 	"streaming_service/config"
 	grpc_delivery "streaming_service/internal/delivery/grpc"
+	"streaming_service/internal/infrastructure"
+	email "streaming_service/internal/infrastructure/email"
 	"streaming_service/internal/repository/nats"
 	"streaming_service/internal/repository/postgres"
 	"streaming_service/internal/usecase"
@@ -26,6 +28,13 @@ func main() {
 		log.Fatalf("Failed to connect to database: %v", err)
 	}
 	defer db.Close()
+
+	if err := infrastructure.RunMigrations(db.DB, "./migrations"); err != nil {
+		log.Fatalf("Failed to run migrations: %v", err)
+	}
+
+	emailSender := email.NewSMTPSender(cfg.SMTPHost, cfg.SMTPPort, cfg.SMTPUser, cfg.SMTPPassword)
+	_ = emailSender
 
 	eventPublisher, err := nats.NewEventPublisher(cfg.NATSUrl)
 	if err != nil {

@@ -18,7 +18,8 @@ CREATE TABLE songs (
     album_id BIGINT REFERENCES albums(id) ON DELETE SET NULL,
     duration_seconds INT NOT NULL,
     genre VARCHAR(100),
-    cover_image_url VARCHAR(512)
+    cover_image_url VARCHAR(512),
+    plays_count BIGINT DEFAULT 0
 );
 
 CREATE INDEX idx_songs_title ON songs(title);
